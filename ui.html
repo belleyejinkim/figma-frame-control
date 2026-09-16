@@ -1,0 +1,560 @@
+<meta charset="utf-8">
+<title>Frame Name Control</title>
+<style>
+  :root {
+    --bg: var(--figma-color-bg, #ffffff);
+    --bg-soft: var(--figma-color-bg-secondary, #f5f5f5);
+    --bg-hover: var(--figma-color-bg-hover, #ebebeb);
+    --text: var(--figma-color-text, #1e1e1e);
+    --text-2: var(--figma-color-text-secondary, #767676);
+    --border: var(--figma-color-border, #e6e6e6);
+    --brand: var(--figma-color-bg-brand, #0d99ff);
+    --brand-text: var(--figma-color-text-onbrand, #ffffff);
+  }
+
+  * { box-sizing: border-box; }
+
+  /* .panel-body sets display:flex, which would otherwise override [hidden]. */
+  [hidden] { display: none !important; }
+
+  /* Figma adds figma-dark to <html>. Let native form controls follow it. */
+  html.figma-dark { color-scheme: dark; }
+  input { accent-color: var(--brand); }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 11px/1.45 "Inter", -apple-system, BlinkMacSystemFont, "Pretendard", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .panel {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  .panel-head {
+    padding: 7px 12px;
+    background: var(--bg-soft);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.01em;
+  }
+
+  .panel-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+
+  .stat { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+  .stat .of { color: var(--text-2); font-size: 12px; font-weight: 500; letter-spacing: 0; }
+
+  .hint { margin: 0; color: var(--text-2); }
+  .hint b { color: var(--text); font-weight: 600; }
+
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    padding: 1px 4px;
+    border-radius: 3px;
+    background: var(--bg-soft);
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  button, select {
+    font: inherit;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+  }
+  button { cursor: pointer; padding: 7px 10px; }
+  button:hover { background: var(--bg-hover); }
+
+  button.primary {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-text);
+    font-weight: 600;
+    padding: 9px 12px;
+  }
+  button.primary:hover { filter: brightness(0.94); }
+
+  .btn-row { display: flex; gap: 6px; }
+  .btn-row button { flex: 1; }
+
+  .field { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+  .field input { margin: 0; flex: none; }
+  .field span { flex: 1; }
+  .field small { color: var(--text-2); }
+
+  .group { display: flex; flex-direction: column; gap: 7px; }
+
+  .shortcut-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px;
+    border: 1px dashed var(--border);
+    background: var(--bg-soft);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+  }
+  .shortcut-box.recording {
+    border-style: solid;
+    border-color: var(--brand);
+    color: var(--brand);
+    font-size: 11px;
+    letter-spacing: 0;
+  }
+  .shortcut-box.empty { color: var(--text-2); font-size: 11px; font-weight: 500; letter-spacing: 0; }
+
+  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; color: var(--text-2); }
+  ol.steps li { counter-increment: step; position: relative; padding-left: 15px; margin-bottom: 5px; }
+  ol.steps li:last-child { margin-bottom: 0; }
+  ol.steps li::before { content: counter(step) "."; position: absolute; left: 0; }
+  ol.steps b { color: var(--text); font-weight: 600; }
+
+  details { color: var(--text-2); }
+  details summary { cursor: pointer; user-select: none; }
+  details[open] summary { margin-bottom: 8px; }
+  details .detail-body { display: flex; flex-direction: column; gap: 8px; }
+
+  pre.cmd {
+    margin: 0;
+    padding: 9px 10px;
+    background: var(--bg-soft);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--text);
+  }
+
+  .divider { height: 1px; background: var(--border); margin: 1px 0; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
+  .row label { font-weight: 600; }
+  .row select { padding: 5px 6px; }
+
+  #toast {
+    position: fixed; left: 12px; right: 12px; bottom: 12px;
+    padding: 8px 10px; border-radius: 5px;
+    background: var(--text); color: var(--bg);
+    opacity: 0; transform: translateY(4px);
+    transition: opacity .15s, transform .15s;
+    pointer-events: none;
+  }
+  #toast.on { opacity: 1; transform: none; }
+
+  .sr { position: absolute; left: -9999px; }
+</style>
+
+<div class="wrap">
+
+  <section class="panel">
+    <div class="panel-head" data-i18n="statusTitle"></div>
+    <div class="panel-body">
+      <p class="stat"><span id="stat-hidden">0</span><span class="of"> / <span id="stat-total">0</span> <span data-i18n="hiddenSuffix"></span></span></p>
+      <p class="hint" id="stat-scope"></p>
+      <button class="primary" id="btn-toggle"></button>
+      <div class="btn-row">
+        <button data-cmd="hide" data-i18n="hide"></button>
+        <button data-cmd="show" data-i18n="show"></button>
+        <button data-cmd="restore-all" data-i18n="restoreAll"></button>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head" data-i18n="scopeTitle"></div>
+    <div class="panel-body">
+      <div class="group">
+        <label class="field"><input type="radio" name="scope" value="page"><span data-i18n="scopePage"></span></label>
+        <label class="field"><input type="radio" name="scope" value="document"><span data-i18n="scopeDocument"></span></label>
+        <label class="field"><input type="radio" name="scope" value="selection"><span data-i18n="scopeSelection"></span></label>
+      </div>
+      <div class="divider"></div>
+      <div class="group">
+        <label class="field"><input type="checkbox" id="opt-sections"><span data-i18n="optSections"></span></label>
+        <label class="field"><input type="checkbox" id="opt-components"><span data-i18n="optComponents"></span></label>
+        <label class="field"><input type="checkbox" id="opt-instances"><span><span data-i18n="optInstances"></span> <small data-i18n="optInstancesNote"></small></span></label>
+        <label class="field"><input type="checkbox" id="opt-nested"><span data-i18n="optNested"></span></label>
+      </div>
+      <p class="hint" data-i18n="framesAlways"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head" data-i18n="shortcutTitle"></div>
+
+    <div class="panel-body" id="shortcut-mac">
+      <p class="hint" data-i18n-html="shortcutIntro"></p>
+      <button class="shortcut-box empty" id="rec"></button>
+      <div class="btn-row">
+        <button id="btn-copy-title" data-i18n="copyTitle"></button>
+        <button id="btn-clear" data-i18n="clear"></button>
+      </div>
+      <ol class="steps">
+        <li data-i18n-html="step1"></li>
+        <li data-i18n-html="step2"></li>
+        <li id="step3"></li>
+        <li data-i18n-html="step4"></li>
+      </ol>
+      <details>
+        <summary data-i18n="terminalSummary"></summary>
+        <div class="detail-body">
+          <pre class="cmd" id="cmd"></pre>
+          <button id="btn-copy-cmd" data-i18n="copyCommand"></button>
+        </div>
+      </details>
+      <div class="divider"></div>
+      <p class="hint" data-i18n-html="noSetup"></p>
+    </div>
+
+    <div class="panel-body" id="shortcut-other" hidden>
+      <p class="hint" data-i18n-html="otherPlatform"></p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="row">
+      <label for="language" data-i18n="languageTitle"></label>
+      <select id="language">
+        <option value="auto" data-i18n="languageAuto"></option>
+        <option value="en">English</option>
+        <option value="ko">한국어</option>
+      </select>
+    </div>
+  </section>
+
+</div>
+
+<div id="toast"></div>
+<textarea class="sr" id="clip"></textarea>
+
+<script>
+  var MENU_TITLE = 'Toggle Frame Names';
+  var IS_MAC = /Mac/i.test(navigator.platform || navigator.userAgent);
+
+  var TEXT = {
+    en: {
+      statusTitle: 'Status',
+      hiddenSuffix: 'hidden',
+      showNames: 'Show frame names',
+      hideNames: 'Hide frame names',
+      hide: 'Hide',
+      show: 'Restore',
+      restoreAll: 'Restore all',
+      scopeTitle: 'Scope',
+      scopePage: 'This page',
+      scopeDocument: 'All pages',
+      scopeSelection: 'Selected layers',
+      optSections: 'Sections',
+      optComponents: 'Components',
+      optInstances: 'Instances',
+      optInstancesNote: 'unlinks the main component name',
+      optNested: 'Nested frames',
+      framesAlways: 'Frames are always included.',
+      frames: 'Frames',
+      nestedIncluded: 'incl. nested',
+      shortcutTitle: 'Keyboard shortcut',
+      shortcutIntro: 'Record a shortcut that includes <b>⌘</b>. <b>⌥⌘F</b> is free in Figma.',
+      recordPlaceholder: 'Click, then press your shortcut',
+      recording: 'Press keys · Esc to cancel',
+      copyTitle: 'Copy menu title',
+      clear: 'Clear',
+      step1: 'Open <b>System Settings → Keyboard → Keyboard Shortcuts… → App Shortcuts</b>.',
+      step2: 'Click <b>+</b>, choose <b>Figma</b>, and enter the menu title <code>Toggle Frame Names</code>.',
+      step3: function (label) {
+        return label
+          ? 'Click the shortcut field, press <b>' + label + '</b>, then click <b>Done</b>.'
+          : 'Click the shortcut field, press your shortcut, then click <b>Done</b>.';
+      },
+      step4: 'Quit Figma with <b>⌘Q</b> and open it again.',
+      terminalSummary: 'Or register it from Terminal',
+      copyCommand: 'Copy command',
+      commandPlaceholder: 'Record a shortcut first.',
+      commandNeedsCmd: 'Shortcuts without ⌘ don\'t work in Figma. Record another one.',
+      noSetup: 'No setup: run the plugin once, then press <b>⌥⌘P</b> (Run last plugin).',
+      otherPlatform: 'App shortcuts are a macOS feature. On Windows, run the plugin once, then press <b>Ctrl+Alt+P</b> to run it again.',
+      languageTitle: 'Language',
+      languageAuto: 'Auto',
+      toastNeedCmd: 'Include ⌘ in the shortcut',
+      toastKeyType: 'Use a letter, number, or symbol key',
+      toastCopied: 'Copied',
+      toastCopyFailed: 'Couldn\'t copy. Select the text instead.',
+      toastRecordFirst: 'Record a shortcut with ⌘ first'
+    },
+    ko: {
+      statusTitle: '현재 상태',
+      hiddenSuffix: '숨김',
+      showNames: '이름 다시 보이기',
+      hideNames: '이름 숨기기',
+      hide: '숨기기',
+      show: '복구',
+      restoreAll: '전체 복구',
+      scopeTitle: '적용 범위',
+      scopePage: '이 페이지',
+      scopeDocument: '모든 페이지',
+      scopeSelection: '선택한 레이어',
+      optSections: '섹션',
+      optComponents: '컴포넌트',
+      optInstances: '인스턴스',
+      optInstancesNote: '메인 이름 연동이 끊어짐',
+      optNested: '중첩된 프레임까지',
+      framesAlways: '프레임은 항상 포함됩니다.',
+      frames: '프레임',
+      nestedIncluded: '중첩 포함',
+      shortcutTitle: '단축키',
+      shortcutIntro: '<b>⌘</b>가 들어간 조합을 정하세요. <b>⌥⌘F</b>는 Figma에서 비어 있습니다.',
+      recordPlaceholder: '클릭한 다음 원하는 키를 누르세요',
+      recording: '키를 누르세요 · Esc 취소',
+      copyTitle: '메뉴 제목 복사',
+      clear: '지우기',
+      step1: '<b>시스템 설정 → 키보드 → 키보드 단축키… → 앱 단축키</b>를 엽니다.',
+      step2: '<b>+</b>를 누르고 응용 프로그램에서 <b>Figma</b>를 고른 뒤, 메뉴 제목에 <code>Toggle Frame Names</code>를 입력합니다.',
+      step3: function (label) {
+        return label
+          ? '키보드 단축키 칸을 누르고 <b>' + label + '</b>를 누른 다음 <b>완료</b>를 누릅니다.'
+          : '키보드 단축키 칸을 누르고 원하는 조합을 누른 다음 <b>완료</b>를 누릅니다.';
+      },
+      step4: 'Figma를 <b>⌘Q</b>로 종료했다가 다시 엽니다.',
+      terminalSummary: '터미널로 등록하기',
+      copyCommand: '명령 복사',
+      commandPlaceholder: '단축키를 먼저 지정하세요.',
+      commandNeedsCmd: '⌘가 없는 조합은 Figma에서 동작하지 않습니다. 다시 지정하세요.',
+      noSetup: '설정 없이 쓰려면 한 번 실행한 뒤 <b>⌥⌘P</b>(마지막 플러그인 다시 실행)를 누르세요.',
+      otherPlatform: '앱 단축키는 macOS 기능입니다. Windows에서는 한 번 실행한 뒤 <b>Ctrl+Alt+P</b>로 다시 실행하세요.',
+      languageTitle: '언어',
+      languageAuto: '자동',
+      toastNeedCmd: '⌘가 들어간 조합만 동작합니다',
+      toastKeyType: '문자, 숫자, 기호 키만 지정할 수 있습니다',
+      toastCopied: '복사했습니다',
+      toastCopyFailed: '복사하지 못했습니다. 직접 선택해 주세요',
+      toastRecordFirst: '⌘가 들어간 단축키를 먼저 지정하세요'
+    }
+  };
+
+  var language = 'en';
+  var settings = null;
+  var recording = false;
+
+  var $ = function (id) { return document.getElementById(id); };
+  var t = function () { return TEXT[language] || TEXT.en; };
+  var post = function (msg) { parent.postMessage({ pluginMessage: msg }, '*'); };
+
+  function escapeHtml(text) {
+    return String(text).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  /* ------------------------------------------------------------- shortcut */
+
+  var PUNCT = {
+    Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'",
+    BracketLeft: '[', BracketRight: ']', Backslash: '\\',
+    Minus: '-', Equal: '=', Backquote: '`'
+  };
+
+  function keyFromCode(code) {
+    if (/^Key[A-Z]$/.test(code)) return code.slice(3).toLowerCase();
+    if (/^Digit[0-9]$/.test(code)) return code.slice(5);
+    return PUNCT[code] || null;
+  }
+
+  // macOS NSUserKeyEquivalents: ^ Control, ~ Option, $ Shift, @ Command
+  function buildSpec(mods, key) {
+    return (mods.ctrl ? '^' : '') + (mods.alt ? '~' : '') +
+           (mods.shift ? '$' : '') + (mods.meta ? '@' : '') + key;
+  }
+
+  function buildLabel(mods, key) {
+    return (mods.ctrl ? '⌃' : '') + (mods.alt ? '⌥' : '') +
+           (mods.shift ? '⇧' : '') + (mods.meta ? '⌘' : '') + key.toUpperCase();
+  }
+
+  function hasCommand(spec) {
+    return spec.indexOf('@') !== -1;
+  }
+
+  function commandFor(spec) {
+    return "defaults write com.figma.Desktop NSUserKeyEquivalents -dict-add '" +
+           MENU_TITLE + "' '" + spec + "'";
+  }
+
+  function renderShortcut() {
+    var rec = $('rec');
+    var label = settings && settings.shortcutLabel;
+    var spec = settings && settings.shortcutSpec;
+    var usable = !!(label && spec && hasCommand(spec));
+
+    rec.classList.remove('recording');
+    rec.classList.toggle('empty', !label);
+    rec.textContent = label || t().recordPlaceholder;
+
+    $('step3').innerHTML = t().step3(usable ? escapeHtml(label) : '');
+    $('cmd').textContent = !label ? t().commandPlaceholder
+      : usable ? commandFor(spec) : t().commandNeedsCmd;
+  }
+
+  $('rec').addEventListener('click', function () {
+    if (!settings) return;
+    recording = true;
+    var rec = $('rec');
+    rec.classList.add('recording');
+    rec.classList.remove('empty');
+    rec.textContent = t().recording;
+    rec.focus();
+  });
+
+  window.addEventListener('keydown', function (e) {
+    if (!recording) return;
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (e.key === 'Escape') { recording = false; renderShortcut(); return; }
+    if (['Meta', 'Alt', 'Control', 'Shift'].indexOf(e.key) !== -1) return;
+
+    var mods = { meta: e.metaKey, alt: e.altKey, ctrl: e.ctrlKey, shift: e.shiftKey };
+    if (!mods.meta) { toast(t().toastNeedCmd); return; }
+
+    var key = keyFromCode(e.code);
+    if (!key) { toast(t().toastKeyType); return; }
+
+    recording = false;
+    settings.shortcutLabel = buildLabel(mods, key);
+    settings.shortcutSpec = buildSpec(mods, key);
+    renderShortcut();
+    save();
+  }, true);
+
+  $('btn-clear').addEventListener('click', function () {
+    if (!settings) return;
+    settings.shortcutLabel = '';
+    settings.shortcutSpec = '';
+    renderShortcut();
+    save();
+  });
+
+  function copy(text) {
+    var clip = $('clip');
+    clip.value = text;
+    clip.select();
+    var ok = false;
+    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+    clip.blur();
+    toast(ok ? t().toastCopied : t().toastCopyFailed);
+  }
+
+  $('btn-copy-title').addEventListener('click', function () { copy(MENU_TITLE); });
+
+  $('btn-copy-cmd').addEventListener('click', function () {
+    if (!settings || !settings.shortcutSpec || !hasCommand(settings.shortcutSpec)) {
+      toast(t().toastRecordFirst);
+      return;
+    }
+    copy(commandFor(settings.shortcutSpec));
+  });
+
+  /* ------------------------------------------------------------- settings */
+
+  function save() {
+    post({ type: 'settings', settings: settings });
+  }
+
+  document.querySelectorAll('input[name="scope"]').forEach(function (el) {
+    el.addEventListener('change', function () { settings.scope = el.value; save(); });
+  });
+
+  var CHECKS = {
+    'opt-sections': 'includeSections',
+    'opt-components': 'includeComponents',
+    'opt-instances': 'includeInstances',
+    'opt-nested': 'includeNested'
+  };
+  Object.keys(CHECKS).forEach(function (id) {
+    $(id).addEventListener('change', function () { settings[CHECKS[id]] = $(id).checked; save(); });
+  });
+
+  $('language').addEventListener('change', function () {
+    settings.language = $('language').value;
+    save();
+  });
+
+  /* -------------------------------------------------------------- actions */
+
+  $('btn-toggle').addEventListener('click', function () { post({ type: 'run', command: 'toggle' }); });
+  document.querySelectorAll('button[data-cmd]').forEach(function (el) {
+    el.addEventListener('click', function () { post({ type: 'run', command: el.dataset.cmd }); });
+  });
+
+  /* ---------------------------------------------------------------- toast */
+
+  var toastTimer = null;
+  function toast(text) {
+    var el = $('toast');
+    el.textContent = text;
+    el.classList.add('on');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('on'); }, 2200);
+  }
+
+  /* ----------------------------------------------------------------- sync */
+
+  function applyText() {
+    document.documentElement.lang = language;
+    document.querySelectorAll('[data-i18n]').forEach(function (el) {
+      el.textContent = t()[el.dataset.i18n];
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function (el) {
+      el.innerHTML = t()[el.dataset.i18nHtml];
+    });
+  }
+
+  function render(state) {
+    settings = state.settings;
+    language = TEXT[state.language] ? state.language : 'en';
+    applyText();
+
+    $('stat-hidden').textContent = state.status.hidden;
+    $('stat-total').textContent = state.status.total;
+
+    var parts = [t().frames];
+    if (settings.includeSections) parts.push(t().optSections);
+    if (settings.includeComponents) parts.push(t().optComponents);
+    if (settings.includeInstances) parts.push(t().optInstances);
+    if (settings.includeNested) parts.push(t().nestedIncluded);
+    var where = settings.scope === 'document' ? t().scopeDocument
+              : settings.scope === 'selection' ? t().scopeSelection : t().scopePage;
+    $('stat-scope').textContent = where + ' · ' + parts.join(' · ');
+
+    var scopeInput = document.querySelector('input[name="scope"][value="' + settings.scope + '"]');
+    if (scopeInput) scopeInput.checked = true;
+    Object.keys(CHECKS).forEach(function (id) { $(id).checked = !!settings[CHECKS[id]]; });
+    $('language').value = settings.language || 'auto';
+
+    $('btn-toggle').textContent = state.status.hidden > 0 ? t().showNames : t().hideNames;
+
+    $('shortcut-mac').hidden = !IS_MAC;
+    $('shortcut-other').hidden = IS_MAC;
+    if (!recording) renderShortcut();
+  }
+
+  onmessage = function (event) {
+    var msg = event.data && event.data.pluginMessage;
+    if (msg && msg.type === 'state') render(msg);
+  };
+
+  post({ type: 'ready', language: navigator.language });
+</script>

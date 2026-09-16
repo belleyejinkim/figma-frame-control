@@ -1,0 +1,125 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Frame Name Control cover</title>
+<!--
+  One page renders every frame of the cover animation. Query parameters set the state:
+    keys=cmd,opt,f     keys held down
+    labels=0..1        opacity of the frame name labels
+    toast=hid|restored Figma toast at the bottom of the canvas
+    ghost=1            dashed outlines where hidden labels were (static cover only)
+  Build everything with: python3 assets/src/build.py
+-->
+<style>
+  html, body { margin: 0; }
+  body {
+    width: 1920px; height: 1080px; overflow: hidden; position: relative;
+    background: #111318; color: #FFFFFF;
+    font-family: "Pretendard", "Inter", -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  [hidden] { display: none !important; }
+
+  .copy { position: absolute; left: 150px; top: 208px; width: 760px; }
+  .eyebrow { font-size: 26px; font-weight: 600; letter-spacing: 0.18em; color: #7F8590; margin: 0 0 34px; }
+  h1 { font-size: 118px; line-height: 1.02; font-weight: 800; letter-spacing: -0.035em; margin: 0 0 36px; }
+  .tagline { font-size: 40px; line-height: 1.35; color: #B6BBC4; margin: 0 0 76px; font-weight: 500; }
+
+  .keys { display: flex; gap: 22px; height: 148px; }
+  .key {
+    width: 136px; height: 136px; border-radius: 30px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, "SF Pro Display", sans-serif; font-size: 64px; font-weight: 600;
+    background: #F4F4F2; color: #1A1C21;
+    box-shadow: 0 12px 0 #B9BCC2;
+  }
+  .key.accent { background: #0D99FF; color: #FFFFFF; box-shadow: 0 12px 0 #0870C0; }
+  .key.down { transform: translateY(10px); box-shadow: 0 2px 0 #B9BCC2; background: #E4E4E1; }
+  .key.accent.down { box-shadow: 0 2px 0 #0870C0; background: #0A88E6; }
+
+  .canvas {
+    position: absolute; left: 990px; top: 130px; width: 800px; height: 820px;
+    border-radius: 32px; background: #EDEDEA; overflow: hidden;
+  }
+  .label {
+    position: absolute; top: 92px; font-family: "Inter", -apple-system, sans-serif;
+    font-size: 34px; font-weight: 500; color: #5F5F5A; opacity: var(--label-opacity, 1);
+  }
+  .ghost {
+    position: absolute; top: 92px; height: 44px; border-radius: 22px;
+    border: 3px dashed #B4B4AE; box-sizing: border-box; display: none;
+  }
+  body.ghosts .ghost { display: block; }
+  .a { left: 64px; }
+  .b { left: 418px; }
+  .ghost.a { width: 128px; }
+  .ghost.b { width: 136px; }
+
+  .frame {
+    position: absolute; top: 150px; width: 318px; height: 470px; box-sizing: border-box; padding: 26px;
+    background: #FFFFFF; border-radius: 16px; box-shadow: 0 1px 0 #DADAD5, 0 18px 40px rgba(17, 19, 24, 0.10);
+  }
+  .bar { height: 18px; border-radius: 9px; background: #ECECE8; margin-bottom: 18px; }
+  .img { height: 170px; border-radius: 12px; background: #DDEBFA; margin-bottom: 24px; }
+  .frame.b .img { background: #F6E3D4; }
+  .line { height: 14px; border-radius: 7px; background: #EFEFEB; margin-bottom: 14px; }
+  .btn { height: 52px; border-radius: 12px; background: #1A1C21; margin-top: 30px; }
+
+  .toast {
+    position: absolute; left: 50%; bottom: 76px; transform: translateX(-50%);
+    padding: 20px 34px; border-radius: 16px; background: #1E1E1E; color: #FFFFFF;
+    font-family: "Inter", -apple-system, sans-serif; font-size: 27px; font-weight: 500; white-space: nowrap;
+    box-shadow: 0 16px 40px rgba(17, 19, 24, 0.25);
+  }
+</style>
+
+<div class="copy">
+  <p class="eyebrow">FIGMA PLUGIN</p>
+  <h1>Frame Name<br>Control</h1>
+  <p class="tagline">Hide frame name labels on the canvas with one keyboard shortcut.</p>
+  <div class="keys">
+    <div class="key" data-key="cmd">⌘</div>
+    <div class="key" data-key="opt">⌥</div>
+    <div class="key accent" data-key="f">F</div>
+  </div>
+</div>
+
+<div class="canvas">
+  <div class="label a">Frame 1</div>
+  <div class="label b">Frame 2</div>
+  <div class="ghost a"></div>
+  <div class="ghost b"></div>
+  <div class="frame a">
+    <div class="bar" style="width: 46%"></div>
+    <div class="img"></div>
+    <div class="line" style="width: 88%"></div>
+    <div class="line" style="width: 70%"></div>
+    <div class="line" style="width: 54%"></div>
+    <div class="btn"></div>
+  </div>
+  <div class="frame b">
+    <div class="bar" style="width: 38%"></div>
+    <div class="img"></div>
+    <div class="line" style="width: 80%"></div>
+    <div class="line" style="width: 92%"></div>
+    <div class="line" style="width: 48%"></div>
+    <div class="btn"></div>
+  </div>
+  <div class="toast" hidden></div>
+</div>
+
+<script>
+  var q = new URLSearchParams(location.search);
+  var held = (q.get('keys') || '').split(',');
+  document.querySelectorAll('.key').forEach(function (key) {
+    key.classList.toggle('down', held.indexOf(key.dataset.key) !== -1);
+  });
+
+  var labels = q.has('labels') ? Number(q.get('labels')) : 1;
+  document.body.style.setProperty('--label-opacity', labels);
+  document.body.classList.toggle('ghosts', q.get('ghost') === '1' && labels === 0);
+
+  var toast = document.querySelector('.toast');
+  var messages = { hid: 'Hid 2 names · This page', restored: 'Restored 2 names · This page' };
+  toast.hidden = !messages[q.get('toast')];
+  toast.textContent = messages[q.get('toast')] || '';
+</script>

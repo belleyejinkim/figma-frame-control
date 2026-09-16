@@ -1,0 +1,19 @@
+{
+  "name": "Frame Name Control",
+  "id": "frame-name-control",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": { "allowedDomains": ["none"] },
+  "menu": [
+    { "name": "Toggle Frame Names", "command": "toggle" },
+    { "separator": true },
+    { "name": "Hide Frame Name Labels", "command": "hide" },
+    { "name": "Show Frame Name Labels", "command": "show" },
+    { "name": "Restore All Frame Names", "command": "restore-all" },
+    { "separator": true },
+    { "name": "Frame Name Settings", "command": "settings" }
+  ]
+}
