@@ -8,7 +8,7 @@
   "documentAccess": "dynamic-page",
   "networkAccess": { "allowedDomains": ["none"] },
   "relaunchButtons": [
-    { "command": "toggle", "name": "Toggle frame names" }
+    { "command": "toggle", "name": "Hide/Show Frame Name", "multipleSelection": true }
   ],
   "menu": [
     { "name": "Open", "command": "open" },

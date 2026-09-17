@@ -11,9 +11,11 @@ const BLANK = '⠀';
 const SETTINGS_KEY = 'frame-name-control/settings';
 
 function node(type, name, children) {
-  const n = { type, name, pluginData: {} };
+  const n = { type, name, pluginData: {}, relaunch: {}, relaunchWrites: 0 };
   n.getPluginData = key => n.pluginData[key] || '';
   n.setPluginData = (key, value) => { n.pluginData[key] = value; };
+  n.getRelaunchData = () => n.relaunch;
+  n.setRelaunchData = data => { n.relaunch = data; n.relaunchWrites++; };
   if (children) {
     n.children = children;
     children.forEach(child => { child.parent = n; });
@@ -37,10 +39,6 @@ function buildDoc() {
   const page1 = node('PAGE', 'Page 1', [a, b, section, group, componentSet, component, instance, parentFrame]);
   const page2 = node('PAGE', 'Page 2', [node('FRAME', 'Z')]);
   const root = node('DOCUMENT', 'Doc', [page1, page2]);
-  root.relaunch = {};
-  root.relaunchWrites = 0;
-  root.getRelaunchData = () => root.relaunch;
-  root.setRelaunchData = data => { root.relaunch = data; root.relaunchWrites++; };
   return {
     root, page1, page2,
     n: { a, b, section, inSection, group, inGroup, componentSet, variant, component, instance, parentFrame, child }
@@ -307,6 +305,33 @@ test('running a command adds the right panel button once per file', async () => 
   // The object comes from the plugin's own vm context, so compare values, not prototypes.
   assert.deepStrictEqual(JSON.parse(JSON.stringify(doc.root.relaunch)), { toggle: '' });
   await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.root.relaunchWrites, 1);
+});
+
+test('frames, sections, and components get the button for when they are selected', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'toggle', { store });
+  for (const key of ['a', 'section', 'inSection', 'inGroup', 'component', 'componentSet']) {
+    assert.ok('toggle' in doc.n[key].relaunch, key + ' should carry the button');
+  }
+  for (const key of ['child', 'instance', 'variant', 'group']) {
+    assert.strictEqual(doc.n[key].relaunchWrites, 0, key + ' should not carry the button');
+  }
+  await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.n.a.relaunchWrites, 1);
+  assert.ok('toggle' in doc.n.a.relaunch, 'restoring names keeps the button');
+});
+
+test('a button someone removed from a layer is not added back', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'toggle', { store });
+  doc.n.a.relaunch = {};          // the "−" next to the button in the right panel
+  doc.root.relaunch = {};
+  await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.n.a.relaunchWrites, 1);
+  assert.strictEqual('toggle' in doc.n.a.relaunch, false);
   assert.strictEqual(doc.root.relaunchWrites, 1);
 });
 

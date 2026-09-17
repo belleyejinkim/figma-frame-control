@@ -25,7 +25,7 @@ HIGHLIGHTS
 • Free
 • Restores the exact original names, even after you close and reopen the file
 • Explains what it changes the first time you run it
-• Adds a Toggle frame names button to the right panel after the first use
+• Adds a Hide/Show Frame Name button under Tools in the right panel after the first use
 
 COMMANDS
 • Open: opens the plugin window with buttons to hide and restore names, plus the scope and language
@@ -52,7 +52,7 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 • 무료입니다
 • 파일을 닫았다 열어도 원래 이름을 정확히 되돌립니다
 • 처음 실행할 때 무엇을 바꾸는지 안내합니다
-• 한 번 쓰고 나면 오른쪽 패널에 Toggle frame names 버튼이 생깁니다
+• 한 번 쓰고 나면 오른쪽 패널 Tools에 Hide/Show Frame Name 버튼이 생깁니다
 
 명령
 • Open: 이름을 숨기고 되돌리는 버튼과 적용 범위, 언어가 있는 플러그인 창을 엽니다

@@ -11,6 +11,7 @@
 var BLANK = '⠀';
 var KEY_ORIGINAL = 'fnc_original';
 var KEY_HIDDEN = 'fnc_hidden';
+var KEY_BUTTON = 'fnc_button';
 var SETTINGS_KEY = 'frame-name-control/settings';
 
 // Opened with figma.openExternal, so the plugin itself needs no network access.
@@ -214,12 +215,15 @@ function countHidden(targets) {
 
 /* ---------------------------------------------------------------- commands */
 
-// Puts a "Toggle frame names" button in the right panel, shown whenever nothing is
-// selected. It is stored in the file once, the first time the plugin runs a command there.
-function ensureRelaunchButton() {
+// Puts a "Hide/Show Frame Name" button in the right panel. Figma shows it when nothing is
+// selected (data on the document) and when the selected layers carry the data themselves,
+// so it goes on the document and on every frame, section, and component the plugin handles.
+function ensureRelaunchButton(node) {
   try {
-    // The description is an empty string, so check for the key, not its value.
-    if (!('toggle' in figma.root.getRelaunchData())) figma.root.setRelaunchData({ toggle: '' });
+    // Once added, leave it alone: people can remove it with the "−" next to the button.
+    if (node.getPluginData(KEY_BUTTON) === '1') return;
+    node.setRelaunchData({ toggle: '' });
+    node.setPluginData(KEY_BUTTON, '1');
   } catch (err) {
     // Files you can only view can't store the button. The command still runs.
   }
@@ -231,7 +235,8 @@ function runCommand(command, s) {
   var scopeKey = forceDocument ? 'document' : (t.scope[s.scope] ? s.scope : 'page');
 
   return collectTargets(s, forceDocument).then(function (targets) {
-    ensureRelaunchButton();
+    ensureRelaunchButton(figma.root);
+    for (var n = 0; n < targets.length; n++) ensureRelaunchButton(targets[n]);
 
     if (targets.length === 0) {
       return { changed: 0, hidden: 0, total: 0, message: t.empty[scopeKey] };
