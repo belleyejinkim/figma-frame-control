@@ -1,33 +1,20 @@
 <!doctype html>
 <meta charset="utf-8">
 <title>Frame Name Control icon</title>
-<style>
-  html, body { margin: 0; background: #2C2C2C; }
-  svg { display: block; }
-  text { font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif; font-weight: 600; }
-</style>
+<style>html, body { margin: 0; background: #2C2C2C; } svg { display: block; }</style>
 <!--
   Render at 512 × 512, then scale to 128 × 128. Figma shows the same icon at about 20 pt in
-  plugin search, so the keys fill the width: ⌥ and F stay readable at 40 px.
-  Keys read ⌘ ⌥ F, the order the right hand meets them.
+  plugin search, so both the frame name and the closed eye stay large.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <rect width="512" height="512" fill="#2C2C2C"/>
-
-  <!-- frame, peeking out above the keys -->
-  <rect x="58" y="100" width="396" height="220" rx="32" fill="none" stroke="#FFFFFF" stroke-width="26"/>
-  <rect x="17" y="238" width="478" height="186" rx="48" fill="#2C2C2C"/>
-
-  <!-- ⌘ -->
-  <rect x="29" y="266" width="146" height="146" rx="34" fill="#B9BCC2"/>
-  <rect x="29" y="250" width="146" height="146" rx="34" fill="#F4F4F2"/>
-  <text x="102" y="360" text-anchor="middle" font-size="104" fill="#1A1C21">⌘</text>
-  <!-- ⌥ -->
-  <rect x="185" y="266" width="146" height="146" rx="34" fill="#B9BCC2"/>
-  <rect x="185" y="250" width="146" height="146" rx="34" fill="#F4F4F2"/>
-  <text x="258" y="360" text-anchor="middle" font-size="104" fill="#1A1C21">⌥</text>
-  <!-- F -->
-  <rect x="341" y="266" width="146" height="146" rx="34" fill="#0870C0"/>
-  <rect x="341" y="250" width="146" height="146" rx="34" fill="#0D99FF"/>
-  <text x="414" y="360" text-anchor="middle" font-size="104" fill="#FFFFFF">F</text>
+  <!-- a frame name -->
+  <text x="256" y="204" text-anchor="middle" font-family="'Inter', -apple-system, 'SF Pro Display', sans-serif" font-size="118" font-weight="600" fill="#FFFFFF">Frame 1</text>
+  <!-- closed eye: the name is hidden -->
+  <path d="M128 296 Q256 404 384 296" fill="none" stroke="#0D99FF" stroke-width="34" stroke-linecap="round"/>
+  <line x1="166" y1="335" x2="148" y2="366" stroke="#0D99FF" stroke-width="27" stroke-linecap="round"/>
+  <line x1="211" y1="354" x2="201" y2="388" stroke="#0D99FF" stroke-width="27" stroke-linecap="round"/>
+  <line x1="256" y1="360" x2="256" y2="396" stroke="#0D99FF" stroke-width="27" stroke-linecap="round"/>
+  <line x1="301" y1="354" x2="311" y2="388" stroke="#0D99FF" stroke-width="27" stroke-linecap="round"/>
+  <line x1="346" y1="335" x2="364" y2="366" stroke="#0D99FF" stroke-width="27" stroke-linecap="round"/>
 </svg>

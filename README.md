@@ -2,7 +2,7 @@
 
 [한국어](README.ko.md)
 
-Frame Name Control is a free Figma plugin that hides the frame name labels on the canvas and brings them back with one keyboard shortcut.
+Frame Name Control is a free plugin for Figma that hides the frame name labels on the canvas and brings them back with one keyboard shortcut.
 
 ![Press ⌘⌥F to hide frame name labels, and press it again to bring them back](assets/cover.gif)
 
@@ -125,7 +125,7 @@ python3 assets/src/build.py
 
 ## Feedback
 
-Found a bug or have an idea? Choose **Send feedback** at the bottom of the plugin window, or [open an issue](https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml).
+Found a bug or have an idea? Choose **Send feedback** at the bottom of the plugin window, or [fill out the feedback form](https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform). No account needed.
 
 ## Author
 

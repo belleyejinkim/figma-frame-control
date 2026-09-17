@@ -288,7 +288,7 @@ test('the UI cannot reset onboarding or open arbitrary links', async () => {
   });
   assert.strictEqual(store[SETTINGS_KEY].onboarded, true);
   assert.strictEqual(store[SETTINGS_KEY].scope, 'document');
-  assert.deepStrictEqual(r.opened, ['https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml']);
+  assert.deepStrictEqual(r.opened, ['https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform']);
   assert.deepStrictEqual(r.resized, [[380, 680]]);
 });
 

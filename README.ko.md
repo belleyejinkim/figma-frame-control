@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-캔버스에 떠 있는 프레임 이름 라벨을 단축키 하나로 껐다 켜는 무료 Figma 플러그인입니다.
+캔버스에 떠 있는 프레임 이름 라벨을 단축키 하나로 껐다 켜는 Figma용 무료 플러그인입니다.
 
 ![⌘⌥F를 누르면 프레임 이름 라벨이 사라지고, 다시 누르면 돌아옵니다](assets/cover.gif)
 
@@ -125,7 +125,7 @@ python3 assets/src/build.py
 
 ## 피드백
 
-버그를 찾았거나 아이디어가 있다면 플러그인 창 아래쪽의 **피드백 보내기**를 누르거나 [이슈를 남겨 주세요](https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml).
+버그를 찾았거나 아이디어가 있다면 플러그인 창 아래쪽의 **피드백 보내기**를 누르거나 [피드백 설문](https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform)을 남겨 주세요. 계정이 없어도 됩니다.
 
 ## 만든 사람
 

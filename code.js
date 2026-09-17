@@ -15,7 +15,7 @@ var SETTINGS_KEY = 'frame-name-control/settings';
 
 // Opened with figma.openExternal, so the plugin itself needs no network access.
 var LINKS = {
-  feedback: 'https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml',
+  feedback: 'https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform',
   github: 'https://github.com/belleyejinkim/figma-frame-control',
   linkedin: 'https://www.linkedin.com/in/belleyejinkim/'
 };

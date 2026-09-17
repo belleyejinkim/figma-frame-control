@@ -10,7 +10,7 @@ Copy these fields into the publish form (**Plugins → Manage plugins → Frame 
 | Icon | `assets/icon.png` (128 × 128) |
 | Thumbnail | `assets/cover.mp4` (video, 1920 × 1080). If the form rejects it, use `assets/cover.png`. |
 | Carousel (optional) | `assets/cover.gif`, `assets/cover.png` |
-| Support contact | https://github.com/belleyejinkim/figma-frame-control/issues |
+| Support contact | https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform |
 | Network access | None |
 
 ## Description
@@ -50,7 +50,7 @@ Figma's plugin API can't switch off canvas labels. The plugin renames each frame
 • ⌘Z brings names back, and version history is a safe fallback
 • Variant components are never renamed, and instances are off by default
 
-Feedback: https://github.com/belleyejinkim/figma-frame-control/issues
+Feedback: https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform
 Made by Belle Kim · https://www.linkedin.com/in/belleyejinkim/
 Source code: https://github.com/belleyejinkim/figma-frame-control
 
@@ -87,7 +87,7 @@ Figma 플러그인 API로는 캔버스 라벨을 끌 수 없습니다. 그래서
 • ⌘Z나 버전 기록으로 되돌릴 수 있습니다
 • 배리언트 컴포넌트는 이름을 바꾸지 않고, 인스턴스는 기본으로 빠져 있습니다
 
-피드백: https://github.com/belleyejinkim/figma-frame-control/issues
+피드백: https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform
 만든 사람: Belle Kim · https://www.linkedin.com/in/belleyejinkim/
 소스 코드: https://github.com/belleyejinkim/figma-frame-control
 
