@@ -18,7 +18,7 @@ Name labels help you find frames, but they clutter the canvas when you review a 
 2. Open any design file in the Figma desktop app.
 3. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json`.
 
-You import the plugin once, and it appears in every file. The first time you run a command, the plugin explains how it changes names and waits for you to confirm.
+You import the plugin once, and it appears in every file. The first time you run a command, the plugin opens its window instead, so you can read how it changes names before you hide them.
 
 Import through the **Plugins** menu, not **Widgets**. Importing through Widgets fails with this error:
 
@@ -35,7 +35,7 @@ Manifest error: Expected "manifest.containsWidget" to have type true but got und
 
 ⌥⌘F is awkward to press with one hand. Hold **⌘⌥** on the right side of the keyboard with your right hand, and press **F** with your left.
 
-The plugin's **Frame Name Settings** screen walks you through the same steps for the shortcut you record. You can also register the shortcut from Terminal:
+You can also register the shortcut from Terminal:
 
 ```bash
 ./scripts/set-shortcut.sh cmd+opt+f     # set
@@ -65,12 +65,11 @@ App shortcuts are a macOS feature. On Windows, run the plugin once, then press *
 | Hide Frame Name Labels | Hides names in the current scope. |
 | Show Frame Name Labels | Restores names in the current scope. |
 | Restore All Frame Names | Restores names on every page, whatever the scope. |
-| Frame Name Settings | Opens the settings screen. |
+| Frame Name Settings | Opens the plugin window. |
 
 ## Settings
 
 - **Scope**: this page, all pages, or selected layers
-- **Targets**: sections, components, instances, and nested frames (frames are always included)
 - **Language**: auto, English, or Korean
 
 Figma saves your settings per user, so they follow you from file to file.
@@ -84,7 +83,7 @@ This approach has side effects:
 - **Names look blank in the Layers panel too.** The plugin can't hide the canvas label alone.
 - **Collaborators see the change.** Renaming a layer edits the file.
 - **Each run adds one undo step.** ⌘Z brings the names back, and version history is a safe fallback.
-- **Instances are off by default.** Renaming an instance unlinks it from its main component's name, so it keeps a manual name after you restore it.
+- **Instances and nested frames keep their names.** Renaming an instance would unlink it from its main component's name, and frames nested inside other frames don't show labels on the canvas.
 - **Variant components are never renamed.** Their `Property=Value` names define the variants.
 
 If you rename a layer while its name is hidden, the plugin keeps your new name when it restores the others.
@@ -103,7 +102,7 @@ If you rename a layer while its name is hidden, the plugin keeps your new name w
 ```
 manifest.json            plugin definition and menu commands
 code.js                  hide and restore logic (no build step)
-ui.html                  settings screen and shortcut helper
+ui.html                  plugin window
 scripts/set-shortcut.sh  registers a macOS app shortcut
 test/logic.test.js       tests for the hide and restore logic
 assets/                  Figma Community icon, cover image, GIF, and video

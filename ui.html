@@ -30,7 +30,6 @@
   }
 
   .wrap { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-  .view { display: flex; flex-direction: column; gap: 10px; }
 
   .panel {
     border: 1px solid var(--border);
@@ -50,21 +49,10 @@
 
   .panel-body { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
 
+  .lead { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text); }
+
   .stat { margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
   .stat .of { color: var(--text-2); font-size: 12px; font-weight: 500; letter-spacing: 0; }
-
-  .hint { margin: 0; color: var(--text-2); }
-  .hint b { color: var(--text); font-weight: 600; }
-
-  code {
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px;
-    padding: 1px 4px;
-    border-radius: 3px;
-    background: var(--bg-soft);
-    color: var(--text);
-    white-space: nowrap;
-  }
 
   button, select {
     font: inherit;
@@ -91,68 +79,18 @@
   .field { display: flex; align-items: center; gap: 7px; cursor: pointer; }
   .field input { margin: 0; flex: none; }
   .field span { flex: 1; }
-  .field small { color: var(--text-2); }
 
   .group { display: flex; flex-direction: column; gap: 7px; }
 
-  .shortcut-box {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 12px;
-    border: 1px dashed var(--border);
-    background: var(--bg-soft);
-    font-size: 14px;
-    font-weight: 600;
-    letter-spacing: 0.06em;
-  }
-  .shortcut-box.recording {
-    border-style: solid;
-    border-color: var(--brand);
-    color: var(--brand);
-    font-size: 11px;
-    letter-spacing: 0;
-  }
-  .shortcut-box.empty { color: var(--text-2); font-size: 11px; font-weight: 500; letter-spacing: 0; }
-
-  ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: step; color: var(--text-2); }
-  ol.steps li { counter-increment: step; position: relative; padding-left: 15px; margin-bottom: 5px; }
-  ol.steps li:last-child { margin-bottom: 0; }
-  ol.steps li::before { content: counter(step) "."; position: absolute; left: 0; }
-  ol.steps b { color: var(--text); font-weight: 600; }
-
-  details { color: var(--text-2); }
-  details summary { cursor: pointer; user-select: none; }
-  details[open] summary { margin-bottom: 8px; }
-  details .detail-body { display: flex; flex-direction: column; gap: 8px; }
-
-  pre.cmd {
-    margin: 0;
-    padding: 9px 10px;
-    background: var(--bg-soft);
-    border: 1px solid var(--border);
-    border-radius: 5px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 10px;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-all;
-    color: var(--text);
-  }
-
-  .divider { height: 1px; background: var(--border); margin: 1px 0; }
-
-  button:disabled { opacity: 0.6; cursor: default; }
-
-  .lead { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text); }
-  .subhead { margin: 0; font-weight: 600; color: var(--text); }
-
   ul.bullets { margin: 0; padding: 0; list-style: none; color: var(--text-2); }
-  ul.bullets li { position: relative; padding-left: 12px; margin-bottom: 4px; }
+  ul.bullets li { position: relative; padding-left: 12px; margin-bottom: 5px; }
   ul.bullets li:last-child { margin-bottom: 0; }
   ul.bullets li::before { content: "•"; position: absolute; left: 0; }
   ul.bullets b { color: var(--text); font-weight: 600; }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
+  .row label { font-weight: 600; }
+  .row select { padding: 5px 6px; }
 
   .links { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; padding: 0 2px 2px; }
   .link {
@@ -161,63 +99,21 @@
   }
   .link:hover { background: none; color: var(--text); text-decoration: underline; }
   .link.static, .link.static:hover { cursor: default; color: var(--text-2); text-decoration: none; }
-
-  .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
-  .row label { font-weight: 600; }
-  .row select { padding: 5px 6px; }
-
-  #toast {
-    position: fixed; left: 12px; right: 12px; bottom: 12px;
-    padding: 8px 10px; border-radius: 5px;
-    background: var(--text); color: var(--bg);
-    opacity: 0; transform: translateY(4px);
-    transition: opacity .15s, transform .15s;
-    pointer-events: none;
-  }
-  #toast.on { opacity: 1; transform: none; }
-
-  .sr { position: absolute; left: -9999px; }
 </style>
 
 <div class="wrap">
 
-  <div class="view" id="view-welcome" hidden>
-    <section class="panel">
-      <div class="panel-head" data-i18n="welcomeTitle"></div>
-      <div class="panel-body">
-        <p class="lead" data-i18n="welcomeLead"></p>
-        <div class="group">
-          <p class="subhead" data-i18n="howTitle"></p>
-          <ul class="bullets">
-            <li data-i18n-html="how1"></li>
-            <li data-i18n-html="how2"></li>
-          </ul>
-        </div>
-        <div class="group">
-          <p class="subhead" data-i18n="noteTitle"></p>
-          <ul class="bullets">
-            <li data-i18n-html="note1"></li>
-            <li data-i18n-html="note2"></li>
-          </ul>
-        </div>
-        <div class="group">
-          <p class="subhead" data-i18n="shortcutTitle"></p>
-          <p class="hint" id="welcome-shortcut"></p>
-        </div>
-        <div class="divider"></div>
-        <button class="primary" id="btn-welcome"></button>
-        <button id="btn-later" data-i18n="notNow"></button>
-      </div>
-    </section>
-  </div>
-
-  <div class="view" id="view-settings" hidden>
+  <section class="panel">
+    <div class="panel-head">Frame Name Control</div>
+    <div class="panel-body">
+      <p class="lead" data-i18n="lead"></p>
+    </div>
+  </section>
 
   <section class="panel">
     <div class="panel-head" data-i18n="statusTitle"></div>
     <div class="panel-body">
-      <p class="stat"><span id="stat-hidden">0</span><span class="of"> / <span id="stat-total">0</span> <span data-i18n="hiddenSuffix"></span></span></p>
-      <p class="hint" id="stat-scope"></p>
+      <p class="stat"><span id="stat-hidden">0</span><span class="of" id="stat-of"></span></p>
       <button class="primary" id="btn-toggle"></button>
       <div class="btn-row">
         <button data-cmd="hide" data-i18n="hide"></button>
@@ -235,47 +131,26 @@
         <label class="field"><input type="radio" name="scope" value="document"><span data-i18n="scopeDocument"></span></label>
         <label class="field"><input type="radio" name="scope" value="selection"><span data-i18n="scopeSelection"></span></label>
       </div>
-      <div class="divider"></div>
-      <div class="group">
-        <label class="field"><input type="checkbox" id="opt-sections"><span data-i18n="optSections"></span></label>
-        <label class="field"><input type="checkbox" id="opt-components"><span data-i18n="optComponents"></span></label>
-        <label class="field"><input type="checkbox" id="opt-instances"><span><span data-i18n="optInstances"></span> <small data-i18n="optInstancesNote"></small></span></label>
-        <label class="field"><input type="checkbox" id="opt-nested"><span data-i18n="optNested"></span></label>
-      </div>
-      <p class="hint" data-i18n="framesAlways"></p>
     </div>
   </section>
 
   <section class="panel">
-    <div class="panel-head" data-i18n="shortcutTitle"></div>
-
-    <div class="panel-body" id="shortcut-mac">
-      <p class="hint" data-i18n-html="shortcutIntro"></p>
-      <button class="shortcut-box empty" id="rec"></button>
-      <p class="hint" id="rec-status" hidden></p>
-      <div class="btn-row">
-        <button id="btn-copy-title" data-i18n="copyTitle"></button>
-        <button id="btn-clear" data-i18n="clear"></button>
-      </div>
-      <ol class="steps">
-        <li data-i18n-html="step1"></li>
-        <li data-i18n-html="step2"></li>
-        <li id="step3"></li>
-        <li data-i18n-html="step4"></li>
-      </ol>
-      <details>
-        <summary data-i18n="terminalSummary"></summary>
-        <div class="detail-body">
-          <pre class="cmd" id="cmd"></pre>
-          <button id="btn-copy-cmd" data-i18n="copyCommand"></button>
-        </div>
-      </details>
-      <div class="divider"></div>
-      <p class="hint" data-i18n-html="noSetup"></p>
+    <div class="panel-head" data-i18n="howTitle"></div>
+    <div class="panel-body">
+      <ul class="bullets">
+        <li data-i18n-html="how1"></li>
+        <li id="how2"></li>
+      </ul>
     </div>
+  </section>
 
-    <div class="panel-body" id="shortcut-other" hidden>
-      <p class="hint" data-i18n-html="otherPlatform"></p>
+  <section class="panel">
+    <div class="panel-head" data-i18n="noteTitle"></div>
+    <div class="panel-body">
+      <ul class="bullets">
+        <li data-i18n-html="note1"></li>
+        <li data-i18n-html="note2"></li>
+      </ul>
     </div>
   </section>
 
@@ -290,10 +165,7 @@
     </div>
   </section>
 
-  </div>
-
   <nav class="links">
-    <button class="link" id="link-how" data-i18n="linkHow"></button>
     <button class="link" data-open="feedback" data-i18n="linkFeedback"></button>
     <button class="link" data-open="github">GitHub</button>
     <button class="link" id="link-author" data-open="linkedin" data-i18n="madeBy"></button>
@@ -301,21 +173,14 @@
 
 </div>
 
-<div id="toast"></div>
-<textarea class="sr" id="clip"></textarea>
-
 <script>
-  var MENU_TITLE = 'Toggle Frame Names';
-
-  // ⌘ shortcuts Figma's menus and macOS already use. Read from Figma's menu bar;
-  // a shortcut on this list would never reach Toggle Frame Names.
-  var TAKEN = {"$@'": "Snap to Pixel Grid", "$@,": "Decrease Font Size", "$@.": "Increase Font Size", "$@3": "Screenshot (macOS)", "$@4": "Screenshot (macOS)", "$@5": "Screenshot (macOS)", "$@7": "Numbered List", "$@8": "Bulleted List", "$@=": "Zoom In", "$@\\": "Minimize UI", "$@a": "Select Inverse", "$@c": "Copy as PNG", "$@d": "Find Previous", "$@e": "Export…", "$@f": "Find Next", "$@h": "Show/Hide Selection", "$@j": "Smooth Join Selection", "$@l": "Lock/Unlock Selection", "$@n": "New Window", "$@o": "Show Outlines", "$@p": "Pixel Preview", "$@q": "Log Out", "$@r": "Paste to Replace", "$@s": "Convert to Slot", "$@t": "Reopen Closed Tab", "$@u": "Create Link", "$@v": "Paste Over Selection", "$@w": "Close Window", "$@x": "Strikethrough", "$@z": "Redo", "@-": "Zoom Out", "@0": "Zoom to 100%", "@[": "Send Backward", "@\\": "Show/Hide UI", "@]": "Bring Forward", "@a": "Select All", "@b": "Bold", "@c": "Copy", "@d": "Duplicate", "@f": "Find", "@g": "Group Selection", "@h": "Hide Figma", "@i": "Italic", "@j": "Join Selection", "@k": "Actions…", "@m": "Minimize", "@o": "Open File Browser", "@q": "Quit Figma", "@s": "Wrap in New Section", "@t": "New Tab", "@u": "Underline", "@v": "Paste", "@w": "Close Tab", "@x": "Cut", "@z": "Undo", "^$@3": "Screenshot (macOS)", "^$@4": "Screenshot (macOS)", "^@d": "Look Up (macOS)", "^@m": "Use as Mask", "^@q": "Lock Screen", "^~@k": "Go to Main Component", "~$@-": "Make Smaller", "~$@0": "Reset to Default", "~$@=": "Make Larger", "~$@i": "Toggle Tab Bar Developer Tools", "~$@q": "Log Out", "~$@r": "Resize to Fit", "~@,": "Decrease Font Weight", "~@.": "Increase Font Weight", "~@\\": "Multiplayer Cursors", "~@a": "Select Matching Layers", "~@b": "Detach Instance", "~@c": "Copy Properties", "~@d": "Show/Hide Dock (macOS)", "~@g": "Frame Selection", "~@h": "Hide Others", "~@i": "Toggle Web App Developer Tools", "~@j": "Text Align Justified", "~@k": "Create Component", "~@l": "Text Align Left", "~@m": "Minimize All", "~@o": "Outline Stroke", "~@q": "Quit and Keep Windows", "~@r": "Text Align Right", "~@s": "Save to Version History", "~@t": "Text Align Center", "~@v": "Paste Properties"};
   var IS_MAC = /Mac/i.test(navigator.platform || navigator.userAgent);
 
   var TEXT = {
     en: {
+      lead: 'Hide the name labels on your canvas, then bring them back with one keyboard shortcut.',
       statusTitle: 'Status',
-      hiddenSuffix: 'hidden',
+      hiddenOf: function (total, where) { return ' / ' + total + ' hidden · ' + where; },
       showNames: 'Show frame names',
       hideNames: 'Hide frame names',
       hide: 'Hide',
@@ -325,65 +190,23 @@
       scopePage: 'This page',
       scopeDocument: 'All pages',
       scopeSelection: 'Selected layers',
-      optSections: 'Sections',
-      optComponents: 'Components',
-      optInstances: 'Instances',
-      optInstancesNote: 'unlinks the main component name',
-      optNested: 'Nested frames',
-      framesAlways: 'Frames are always included.',
-      frames: 'Frames',
-      nestedIncluded: 'incl. nested',
-      shortcutTitle: 'Keyboard shortcut',
-      shortcutIntro: 'Plugins can\'t set shortcuts on their own. Pick a combination with <b>⌘</b> here, then add it in System Settings. <b>⌥⌘F</b> is free in Figma.',
-      recordPlaceholder: 'Click, then press a combination',
-      notActiveYet: 'Not active yet. It works after you add it in System Settings (steps below).',
-      recording: 'Press keys · Esc to cancel',
-      copyTitle: 'Copy menu title',
-      clear: 'Clear',
-      step1: 'Open <b>System Settings → Keyboard → Keyboard Shortcuts… → App Shortcuts</b>.',
-      step2: 'Click <b>+</b>, choose <b>Figma</b>, and enter the menu title <code>Toggle Frame Names</code>. Adding it again replaces the old shortcut.',
-      step3: function (label) {
-        return label
-          ? 'Click the shortcut field, press <b>' + label + '</b>, then click <b>Done</b>.'
-          : 'Click the shortcut field, press your shortcut, then click <b>Done</b>.';
-      },
-      step4: 'Quit Figma with <b>⌘Q</b> and open it again.',
-      terminalSummary: 'Or register it from Terminal',
-      copyCommand: 'Copy command',
-      commandPlaceholder: 'Record a shortcut first.',
-      commandNeedsCmd: 'Shortcuts without ⌘ don\'t work in Figma. Record another one.',
-      noSetup: 'No setup: run the plugin once, then press <b>⌥⌘P</b> (Run last plugin).',
-      otherPlatform: 'App shortcuts are a macOS feature. On Windows, run the plugin once, then press <b>Ctrl+Alt+P</b> to run it again.',
-      languageTitle: 'Language',
-      languageAuto: 'Auto',
-      toastNeedCmd: 'Include ⌘ in the shortcut',
-      toastTaken: function (label, title) { return label + ' is already used for “' + title + '”. Pick another.'; },
-      toastKeyType: 'Use a letter, number, or symbol key',
-      toastCopied: 'Copied',
-      toastCopyFailed: 'Couldn\'t copy. Select the text instead.',
-      toastRecordFirst: 'Record a shortcut with ⌘ first',
-      welcomeTitle: 'Welcome to Frame Name Control',
-      welcomeLead: 'Hide the name labels on your canvas, then bring them back with the same command.',
       howTitle: 'How it works',
       how1: 'Figma has no switch for canvas labels, so the plugin <b>temporarily renames</b> frames and sections to an invisible character.',
-      how2: 'The original names are saved in the file. <b>Run the command again</b>, choose <b>Restore all</b>, or press <b>⌘Z</b> to bring them back.',
+      how2: function (undo) {
+        return 'The original names are saved in the file. <b>Run the command again</b>, choose <b>Restore all</b>, or press <b>' + undo + '</b> to bring them back.';
+      },
       noteTitle: 'Good to know',
       note1: 'Names also look blank in the Layers panel, and people viewing the same file see the change.',
-      note2: 'Variant components are never renamed, and instances are skipped by default.',
-      welcomeShortcutMac: 'In System Settings, bind <b>⌥⌘F</b> to <code>Toggle Frame Names</code>. <b>Frame Name Settings</b> walks you through it.',
-      welcomeShortcutOther: 'Run the plugin once, then press <b>Ctrl+Alt+P</b> to run it again.',
-      welcomeHide: 'Got it, hide names',
-      welcomeRestore: 'Got it, restore names',
-      welcomeContinue: 'Got it',
-      welcomeBack: 'Back to settings',
-      notNow: 'Not now',
-      linkHow: 'How it works',
+      note2: 'Instances, variants, and frames nested inside other frames keep their names.',
+      languageTitle: 'Language',
+      languageAuto: 'Auto',
       linkFeedback: 'Send feedback',
       madeBy: 'Made by Belle Kim'
     },
     ko: {
+      lead: '캔버스의 이름 라벨을 숨기고, 단축키 하나로 다시 켭니다.',
       statusTitle: '현재 상태',
-      hiddenSuffix: '숨김',
+      hiddenOf: function (total, where) { return ' / ' + total + ' 숨김 · ' + where; },
       showNames: '이름 다시 보이기',
       hideNames: '이름 숨기기',
       hide: '숨기기',
@@ -393,59 +216,16 @@
       scopePage: '이 페이지',
       scopeDocument: '모든 페이지',
       scopeSelection: '선택한 레이어',
-      optSections: '섹션',
-      optComponents: '컴포넌트',
-      optInstances: '인스턴스',
-      optInstancesNote: '메인 이름 연동이 끊어짐',
-      optNested: '중첩된 프레임까지',
-      framesAlways: '프레임은 항상 포함됩니다.',
-      frames: '프레임',
-      nestedIncluded: '중첩 포함',
-      shortcutTitle: '단축키',
-      shortcutIntro: '플러그인은 단축키를 직접 등록할 수 없습니다. 여기서 <b>⌘</b>가 들어간 조합을 고른 뒤 시스템 설정에 추가하세요. <b>⌥⌘F</b>는 Figma에서 비어 있습니다.',
-      recordPlaceholder: '클릭한 다음 원하는 조합을 누르세요',
-      notActiveYet: '아직 동작하지 않습니다. 아래 순서대로 시스템 설정에 추가해야 동작합니다.',
-      recording: '키를 누르세요 · Esc 취소',
-      copyTitle: '메뉴 제목 복사',
-      clear: '지우기',
-      step1: '<b>시스템 설정 → 키보드 → 키보드 단축키… → 앱 단축키</b>를 엽니다.',
-      step2: '<b>+</b>를 누르고 응용 프로그램에서 <b>Figma</b>를 고른 뒤, 메뉴 제목에 <code>Toggle Frame Names</code>를 입력합니다. 다시 추가하면 예전 단축키를 대신합니다.',
-      step3: function (label) {
-        return label
-          ? '키보드 단축키 칸을 누르고 <b>' + label + '</b>를 누른 다음 <b>완료</b>를 누릅니다.'
-          : '키보드 단축키 칸을 누르고 원하는 조합을 누른 다음 <b>완료</b>를 누릅니다.';
-      },
-      step4: 'Figma를 <b>⌘Q</b>로 종료했다가 다시 엽니다.',
-      terminalSummary: '터미널로 등록하기',
-      copyCommand: '명령 복사',
-      commandPlaceholder: '단축키를 먼저 지정하세요.',
-      commandNeedsCmd: '⌘가 없는 조합은 Figma에서 동작하지 않습니다. 다시 지정하세요.',
-      noSetup: '설정 없이 쓰려면 한 번 실행한 뒤 <b>⌥⌘P</b>(마지막 플러그인 다시 실행)를 누르세요.',
-      otherPlatform: '앱 단축키는 macOS 기능입니다. Windows에서는 한 번 실행한 뒤 <b>Ctrl+Alt+P</b>로 다시 실행하세요.',
-      languageTitle: '언어',
-      languageAuto: '자동',
-      toastNeedCmd: '⌘가 들어간 조합만 동작합니다',
-      toastTaken: function (label, title) { return label + '는 이미 “' + title + '”에 쓰이고 있습니다. 다른 조합을 고르세요.'; },
-      toastKeyType: '문자, 숫자, 기호 키만 지정할 수 있습니다',
-      toastCopied: '복사했습니다',
-      toastCopyFailed: '복사하지 못했습니다. 직접 선택해 주세요',
-      toastRecordFirst: '⌘가 들어간 단축키를 먼저 지정하세요',
-      welcomeTitle: 'Frame Name Control 사용 안내',
-      welcomeLead: '캔버스의 프레임 이름 라벨을 숨기고, 같은 명령으로 다시 켭니다.',
       howTitle: '동작 방식',
       how1: 'Figma에는 캔버스 라벨을 끄는 기능이 없어서, 프레임과 섹션의 이름을 <b>잠시 보이지 않는 문자로 바꿉니다</b>.',
-      how2: '원래 이름은 파일에 저장됩니다. <b>명령을 다시 실행</b>하거나 <b>전체 복구</b>를 누르거나 <b>⌘Z</b>를 누르면 돌아옵니다.',
+      how2: function (undo) {
+        return '원래 이름은 파일에 저장됩니다. <b>명령을 다시 실행</b>하거나 <b>전체 복구</b>를 누르거나 <b>' + undo + '</b>를 누르면 돌아옵니다.';
+      },
       noteTitle: '알아 두세요',
       note1: '레이어 패널에서도 이름이 비어 보이고, 같은 파일을 보는 사람에게도 바뀐 이름이 보입니다.',
-      note2: '배리언트 컴포넌트는 이름을 바꾸지 않고, 인스턴스는 기본으로 건너뜁니다.',
-      welcomeShortcutMac: '시스템 설정에서 <code>Toggle Frame Names</code>에 <b>⌥⌘F</b>를 붙이세요. 방법은 <b>Frame Name Settings</b>에 있습니다.',
-      welcomeShortcutOther: '한 번 실행한 뒤 <b>Ctrl+Alt+P</b>를 누르면 다시 실행됩니다.',
-      welcomeHide: '확인하고 이름 숨기기',
-      welcomeRestore: '확인하고 이름 복구하기',
-      welcomeContinue: '확인',
-      welcomeBack: '설정으로 돌아가기',
-      notNow: '나중에',
-      linkHow: '사용 안내',
+      note2: '인스턴스, 배리언트, 다른 프레임 안에 있는 프레임은 이름을 바꾸지 않습니다.',
+      languageTitle: '언어',
+      languageAuto: '자동',
       linkFeedback: '피드백 보내기',
       madeBy: 'Made by Belle Kim'
     }
@@ -453,155 +233,21 @@
 
   var language = 'en';
   var settings = null;
-  var recording = false;
-  var view = 'settings';
-  var pendingCommand = null;
-  var lastStatus = { total: 0, hidden: 0 };   // not `status`: that is window.status, a string
   var links = { linkedin: false };
-  var reopenedGuide = false;   // guide opened again from "How it works"
   var lastHeight = 0;
 
   var $ = function (id) { return document.getElementById(id); };
   var t = function () { return TEXT[language] || TEXT.en; };
   var post = function (msg) { parent.postMessage({ pluginMessage: msg }, '*'); };
 
-  function escapeHtml(text) {
-    return String(text).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  /* ------------------------------------------------------------- shortcut */
-
-  var PUNCT = {
-    Comma: ',', Period: '.', Slash: '/', Semicolon: ';', Quote: "'",
-    BracketLeft: '[', BracketRight: ']', Backslash: '\\',
-    Minus: '-', Equal: '=', Backquote: '`'
-  };
-
-  function keyFromCode(code) {
-    if (/^Key[A-Z]$/.test(code)) return code.slice(3).toLowerCase();
-    if (/^Digit[0-9]$/.test(code)) return code.slice(5);
-    return PUNCT[code] || null;
-  }
-
-  // macOS NSUserKeyEquivalents: ^ Control, ~ Option, $ Shift, @ Command
-  function buildSpec(mods, key) {
-    return (mods.ctrl ? '^' : '') + (mods.alt ? '~' : '') +
-           (mods.shift ? '$' : '') + (mods.meta ? '@' : '') + key;
-  }
-
-  function buildLabel(mods, key) {
-    return (mods.ctrl ? '⌃' : '') + (mods.alt ? '⌥' : '') +
-           (mods.shift ? '⇧' : '') + (mods.meta ? '⌘' : '') + key.toUpperCase();
-  }
-
-  function hasCommand(spec) {
-    return spec.indexOf('@') !== -1;
-  }
-
-  function commandFor(spec) {
-    return "defaults write com.figma.Desktop NSUserKeyEquivalents -dict-add '" +
-           MENU_TITLE + "' '" + spec + "'";
-  }
-
-  function renderShortcut() {
-    var rec = $('rec');
-    var label = settings && settings.shortcutLabel;
-    var spec = settings && settings.shortcutSpec;
-    var usable = !!(label && spec && hasCommand(spec));
-
-    rec.classList.remove('recording');
-    rec.classList.toggle('empty', !label);
-    rec.textContent = label || t().recordPlaceholder;
-    $('rec-status').hidden = !usable;
-    $('rec-status').textContent = usable ? t().notActiveYet : '';
-
-    $('step3').innerHTML = t().step3(usable ? escapeHtml(label) : '');
-    $('cmd').textContent = !label ? t().commandPlaceholder
-      : usable ? commandFor(spec) : t().commandNeedsCmd;
-  }
-
-  $('rec').addEventListener('click', function () {
-    if (!settings) return;
-    recording = true;
-    var rec = $('rec');
-    rec.classList.add('recording');
-    rec.classList.remove('empty');
-    rec.textContent = t().recording;
-    rec.focus();
-  });
-
-  window.addEventListener('keydown', function (e) {
-    if (!recording) return;
-    e.preventDefault();
-    e.stopPropagation();
-
-    if (e.key === 'Escape') { recording = false; renderShortcut(); return; }
-    if (['Meta', 'Alt', 'Control', 'Shift'].indexOf(e.key) !== -1) return;
-
-    var mods = { meta: e.metaKey, alt: e.altKey, ctrl: e.ctrlKey, shift: e.shiftKey };
-    if (!mods.meta) { toast(t().toastNeedCmd); return; }
-
-    var key = keyFromCode(e.code);
-    if (!key) { toast(t().toastKeyType); return; }
-
-    var spec = buildSpec(mods, key);
-    if (TAKEN[spec]) { toast(t().toastTaken(buildLabel(mods, key), TAKEN[spec])); return; }
-
-    recording = false;
-    settings.shortcutLabel = buildLabel(mods, key);
-    settings.shortcutSpec = spec;
-    renderShortcut();
-    save();
-  }, true);
-
-  $('btn-clear').addEventListener('click', function () {
-    if (!settings) return;
-    settings.shortcutLabel = '';
-    settings.shortcutSpec = '';
-    renderShortcut();
-    save();
-  });
-
-  function copy(text) {
-    var clip = $('clip');
-    clip.value = text;
-    clip.select();
-    var ok = false;
-    try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
-    clip.blur();
-    toast(ok ? t().toastCopied : t().toastCopyFailed);
-  }
-
-  $('btn-copy-title').addEventListener('click', function () { copy(MENU_TITLE); });
-
-  $('btn-copy-cmd').addEventListener('click', function () {
-    if (!settings || !settings.shortcutSpec || !hasCommand(settings.shortcutSpec)) {
-      toast(t().toastRecordFirst);
-      return;
-    }
-    copy(commandFor(settings.shortcutSpec));
-  });
-
-  /* ------------------------------------------------------------- settings */
-
   function save() {
     post({ type: 'settings', settings: settings });
   }
 
+  /* -------------------------------------------------------------- controls */
+
   document.querySelectorAll('input[name="scope"]').forEach(function (el) {
     el.addEventListener('change', function () { settings.scope = el.value; save(); });
-  });
-
-  var CHECKS = {
-    'opt-sections': 'includeSections',
-    'opt-components': 'includeComponents',
-    'opt-instances': 'includeInstances',
-    'opt-nested': 'includeNested'
-  };
-  Object.keys(CHECKS).forEach(function (id) {
-    $(id).addEventListener('change', function () { settings[CHECKS[id]] = $(id).checked; save(); });
   });
 
   $('language').addEventListener('change', function () {
@@ -609,62 +255,9 @@
     save();
   });
 
-  /* -------------------------------------------------------------- actions */
-
   $('btn-toggle').addEventListener('click', function () { post({ type: 'run', command: 'toggle' }); });
   document.querySelectorAll('button[data-cmd]').forEach(function (el) {
     el.addEventListener('click', function () { post({ type: 'run', command: el.dataset.cmd }); });
-  });
-
-  /* ---------------------------------------------------------------- views */
-
-  function welcomeLabel() {
-    if (reopenedGuide) return t().welcomeBack;
-    if (pendingCommand === 'hide') return t().welcomeHide;
-    if (pendingCommand === 'show' || pendingCommand === 'restore-all') return t().welcomeRestore;
-    if (pendingCommand === 'toggle') return lastStatus.hidden > 0 ? t().welcomeRestore : t().welcomeHide;
-    return t().welcomeContinue;
-  }
-
-  function showView() {
-    var welcome = reopenedGuide || view === 'welcome';
-    $('view-welcome').hidden = !welcome;
-    $('view-settings').hidden = welcome;
-    $('link-how').hidden = welcome;
-    $('link-author').classList.toggle('static', !links.linkedin);
-
-    var primary = $('btn-welcome');
-    primary.textContent = welcomeLabel();
-    primary.disabled = false;
-    $('btn-later').hidden = reopenedGuide || !pendingCommand;
-    $('welcome-shortcut').innerHTML = IS_MAC ? t().welcomeShortcutMac : t().welcomeShortcutOther;
-
-    // Fit the window to the content. The plugin caps the height.
-    requestAnimationFrame(function () {
-      var height = document.body.scrollHeight;
-      if (Math.abs(height - lastHeight) > 4) {
-        lastHeight = height;
-        post({ type: 'resize', height: height });
-      }
-    });
-  }
-
-  $('btn-welcome').addEventListener('click', function () {
-    if (reopenedGuide) {
-      reopenedGuide = false;
-      showView();
-      return;
-    }
-    $('btn-welcome').disabled = true;
-    post({ type: 'welcome-done', run: !!pendingCommand });
-  });
-
-  $('btn-later').addEventListener('click', function () { post({ type: 'close' }); });
-
-  $('link-how').addEventListener('click', function () {
-    reopenedGuide = true;
-    showView();
-    window.scrollTo(0, 0);
   });
 
   document.querySelectorAll('[data-open]').forEach(function (el) {
@@ -673,17 +266,6 @@
       post({ type: 'open', link: el.dataset.open });
     });
   });
-
-  /* ---------------------------------------------------------------- toast */
-
-  var toastTimer = null;
-  function toast(text) {
-    var el = $('toast');
-    el.textContent = text;
-    el.classList.add('on');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.classList.remove('on'); }, 2200);
-  }
 
   /* ----------------------------------------------------------------- sync */
 
@@ -697,38 +279,36 @@
     });
   }
 
+  // Fit the window to the content. The plugin caps the height.
+  function fitWindow() {
+    requestAnimationFrame(function () {
+      var height = document.body.scrollHeight;
+      if (Math.abs(height - lastHeight) > 4) {
+        lastHeight = height;
+        post({ type: 'resize', height: height });
+      }
+    });
+  }
+
   function render(state) {
     settings = state.settings;
     language = TEXT[state.language] ? state.language : 'en';
-    view = state.view || 'settings';
-    pendingCommand = state.pendingCommand || null;
-    lastStatus = state.status;
     links = state.links || links;
     applyText();
 
-    $('stat-hidden').textContent = state.status.hidden;
-    $('stat-total').textContent = state.status.total;
-
-    var parts = [t().frames];
-    if (settings.includeSections) parts.push(t().optSections);
-    if (settings.includeComponents) parts.push(t().optComponents);
-    if (settings.includeInstances) parts.push(t().optInstances);
-    if (settings.includeNested) parts.push(t().nestedIncluded);
     var where = settings.scope === 'document' ? t().scopeDocument
               : settings.scope === 'selection' ? t().scopeSelection : t().scopePage;
-    $('stat-scope').textContent = where + ' · ' + parts.join(' · ');
+    $('stat-hidden').textContent = state.status.hidden;
+    $('stat-of').textContent = t().hiddenOf(state.status.total, where);
+    $('btn-toggle').textContent = state.status.hidden > 0 ? t().showNames : t().hideNames;
+    $('how2').innerHTML = t().how2(IS_MAC ? '⌘Z' : 'Ctrl+Z');
 
     var scopeInput = document.querySelector('input[name="scope"][value="' + settings.scope + '"]');
     if (scopeInput) scopeInput.checked = true;
-    Object.keys(CHECKS).forEach(function (id) { $(id).checked = !!settings[CHECKS[id]]; });
     $('language').value = settings.language || 'auto';
+    $('link-author').classList.toggle('static', !links.linkedin);
 
-    $('btn-toggle').textContent = state.status.hidden > 0 ? t().showNames : t().hideNames;
-
-    $('shortcut-mac').hidden = !IS_MAC;
-    $('shortcut-other').hidden = IS_MAC;
-    if (!recording) renderShortcut();
-    showView();
+    fitWindow();
   }
 
   onmessage = function (event) {

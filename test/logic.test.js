@@ -97,14 +97,14 @@ function run(doc, command, opts = {}) {
 const tests = [];
 const test = (name, fn) => tests.push({ name, fn });
 
-test('toggle hides top-level frames', async () => {
+test('toggle hides top-level frames and keeps the original name', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
   assert.strictEqual(doc.n.a.name, BLANK);
   assert.strictEqual(doc.n.a.getPluginData('fnc_original'), 'A');
 });
 
-test('toggle hides sections and the frames inside sections and groups', async () => {
+test('sections, and frames inside sections and groups, are hidden', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
   assert.strictEqual(doc.n.section.name, BLANK);
@@ -112,19 +112,28 @@ test('toggle hides sections and the frames inside sections and groups', async ()
   assert.strictEqual(doc.n.inGroup.name, BLANK);
 });
 
-test('component sets are hidden, variants are never renamed', async () => {
+test('components and component sets are hidden, variants never', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
+  assert.strictEqual(doc.n.component.name, BLANK);
   assert.strictEqual(doc.n.componentSet.name, BLANK);
   assert.strictEqual(doc.n.variant.name, 'Size=Large');
 });
 
-test('instances, nested frames, and other pages are left alone by default', async () => {
+test('instances, nested frames, and other pages keep their names', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
   assert.strictEqual(doc.n.instance.name, 'Button Instance');
   assert.strictEqual(doc.n.child.name, 'Child');
   assert.strictEqual(doc.page2.children[0].name, 'Z');
+});
+
+test('old target options saved by earlier versions are ignored', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { includeInstances: true, includeNested: true, includeSections: false } });
+  assert.strictEqual(doc.n.instance.name, 'Button Instance');
+  assert.strictEqual(doc.n.child.name, 'Child');
+  assert.strictEqual(doc.n.section.name, BLANK);
 });
 
 test('a second toggle restores names and clears plugin data', async () => {
@@ -135,21 +144,6 @@ test('a second toggle restores names and clears plugin data', async () => {
   assert.strictEqual(doc.n.a.name, 'A');
   assert.strictEqual(doc.n.inSection.name, 'InSection');
   assert.strictEqual(doc.n.a.getPluginData('fnc_hidden'), '');
-});
-
-test('includeNested and includeInstances widen the targets', async () => {
-  const doc = buildDoc();
-  await run(doc, 'hide', { settings: { includeNested: true, includeInstances: true } });
-  assert.strictEqual(doc.n.child.name, BLANK);
-  assert.strictEqual(doc.n.instance.name, BLANK);
-});
-
-test('turning sections and components off keeps their names', async () => {
-  const doc = buildDoc();
-  await run(doc, 'hide', { settings: { includeSections: false, includeComponents: false } });
-  assert.strictEqual(doc.n.section.name, 'Section S');
-  assert.strictEqual(doc.n.inSection.name, BLANK);
-  assert.strictEqual(doc.n.component.name, 'Icon');
 });
 
 test('document scope reaches other pages, restore-all ignores scope', async () => {
@@ -177,20 +171,35 @@ test('hiding twice does not overwrite the original name', async () => {
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('selection scope only touches the selection', async () => {
+test('selection scope touches only the selection', async () => {
   const doc = buildDoc();
   await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.b] });
   assert.strictEqual(doc.n.b.name, BLANK);
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('the settings command opens the UI and sends state after ready', async () => {
+test('selecting a frame leaves the frames nested inside it alone', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.parentFrame] });
+  assert.strictEqual(doc.n.parentFrame.name, BLANK);
+  assert.strictEqual(doc.n.child.name, 'Child');
+});
+
+test('selecting a section hides the frames inside it', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.section] });
+  assert.strictEqual(doc.n.section.name, BLANK);
+  assert.strictEqual(doc.n.inSection.name, BLANK);
+});
+
+test('Frame Name Settings opens the window and sends state after ready', async () => {
   const doc = buildDoc();
   const r = await run(doc, 'settings', { language: 'ko-KR' });
   const state = r.uiMessages.find(m => m.type === 'state');
   assert.ok(r.shownUI[0].visible !== false);
   assert.strictEqual(state.language, 'ko');
   assert.ok(state.status.total > 0);
+  assert.strictEqual('view' in state, false);
   assert.strictEqual(r.store[SETTINGS_KEY].detectedLanguage, 'ko');
 });
 
@@ -220,25 +229,27 @@ test('a language override skips detection', async () => {
   assert.match(r.closed, /^Hid /);
 });
 
-test('the first run shows the guide instead of renaming right away', async () => {
+test('the first command opens the window instead of renaming', async () => {
   const doc = buildDoc();
   const r = await run(doc, 'toggle', { settings: { onboarded: false } });
-  const state = r.uiMessages.find(m => m.type === 'state');
-  assert.strictEqual(state.view, 'welcome');
-  assert.strictEqual(state.pendingCommand, 'toggle');
+  assert.ok(r.uiMessages.some(m => m.type === 'state'));
   assert.ok(r.shownUI[0].visible !== false);
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('confirming the guide runs the pending command and remembers it', async () => {
+test('hiding names from the window lets later commands run without it', async () => {
   const doc = buildDoc();
   const store = {};
-  const r = await run(doc, 'toggle', {
+  let states = 0;
+  await run(doc, 'toggle', {
     store,
     settings: { onboarded: false },
-    onState: (state, send) => send({ type: 'welcome-done', run: true })
+    onState: (state, send, done) => {
+      states++;
+      if (states === 1) send({ type: 'run', command: 'toggle' });
+      else done();
+    }
   });
-  assert.match(r.closed, /^Hid \d+ names/);
   assert.strictEqual(doc.n.a.name, BLANK);
   assert.strictEqual(store[SETTINGS_KEY].onboarded, true);
 
@@ -247,7 +258,7 @@ test('confirming the guide runs the pending command and remembers it', async () 
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('"Not now" closes without renaming and shows the guide again next time', async () => {
+test('closing the window without running keeps it for the next command', async () => {
   const doc = buildDoc();
   const store = {};
   await run(doc, 'hide', {
@@ -259,21 +270,7 @@ test('"Not now" closes without renaming and shows the guide again next time', as
   assert.strictEqual(store[SETTINGS_KEY].onboarded, false);
 });
 
-test('the guide opened from settings continues to the settings view', async () => {
-  const doc = buildDoc();
-  const views = [];
-  await run(doc, 'settings', {
-    settings: { onboarded: false },
-    onState: (state, send, done) => {
-      views.push(state.view);
-      if (state.view === 'welcome') send({ type: 'welcome-done', run: false });
-      else done();
-    }
-  });
-  assert.deepStrictEqual(views, ['welcome', 'settings']);
-});
-
-test('the UI cannot reset onboarding or open arbitrary links', async () => {
+test('the window cannot reset onboarding or open arbitrary links', async () => {
   const doc = buildDoc();
   const store = {};
   const r = await run(doc, 'settings', {

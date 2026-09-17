@@ -22,15 +22,9 @@ var LINKS = {
 
 var DEFAULTS = {
   scope: 'page',            // 'page' | 'document' | 'selection'
-  includeNested: false,
-  includeSections: true,
-  includeComponents: true,  // COMPONENT, COMPONENT_SET
-  includeInstances: false,  // renaming unlinks the instance from its main component's name
-  shortcutLabel: '',        // shown in the UI, e.g. "⌥⌘F"
-  shortcutSpec: '',         // macOS NSUserKeyEquivalents string, e.g. "~@f"
   language: 'auto',         // 'auto' | 'en' | 'ko'
   detectedLanguage: '',     // last language reported by a UI iframe
-  onboarded: false          // the first-run guide has been confirmed
+  onboarded: false          // names have been changed from the plugin window at least once
 };
 
 // Only the plugin changes these. The UI's copy can be stale.
@@ -128,36 +122,33 @@ function saveSettings(settings) {
 
 /* ----------------------------------------------------------------- targets */
 
-function isTarget(node, s) {
+function isTarget(node) {
   switch (node.type) {
     case 'FRAME':
-      return true;
     case 'SECTION':
-      return s.includeSections;
+    case 'COMPONENT_SET':
+      return true;
     case 'COMPONENT':
       // Variant names follow "Property=Value". Renaming one breaks the variant.
-      return s.includeComponents && !(node.parent && node.parent.type === 'COMPONENT_SET');
-    case 'COMPONENT_SET':
-      return s.includeComponents;
-    case 'INSTANCE':
-      return s.includeInstances;
+      return !(node.parent && node.parent.type === 'COMPONENT_SET');
     default:
+      // Instances keep the name that follows their main component.
       return false;
   }
 }
 
-function walk(container, s, out) {
+// Frames inside sections and groups still show labels on the canvas.
+// Frames nested inside other frames don't, so they keep their names.
+function showsNestedLabels(node) {
+  return node.type === 'SECTION' || node.type === 'GROUP';
+}
+
+function walk(container, out) {
   var kids = container.children;
   for (var i = 0; i < kids.length; i++) {
     var node = kids[i];
-    if (isTarget(node, s)) out.push(node);
-
-    if (node.type === 'SECTION' || node.type === 'GROUP') {
-      // Frames inside sections and groups still show their labels on the canvas.
-      walk(node, s, out);
-    } else if (s.includeNested && node.type !== 'INSTANCE' && 'children' in node) {
-      walk(node, s, out);
-    }
+    if (isTarget(node)) out.push(node);
+    if (showsNestedLabels(node)) walk(node, out);
   }
 }
 
@@ -168,8 +159,8 @@ function collectTargets(s, forceDocument) {
     var sel = figma.currentPage.selection;
     for (var i = 0; i < sel.length; i++) {
       var node = sel[i];
-      if (isTarget(node, s)) out.push(node);
-      if ('children' in node) walk(node, s, out);
+      if (isTarget(node)) out.push(node);
+      if (showsNestedLabels(node)) walk(node, out);
     }
     return Promise.resolve(out);
   }
@@ -177,12 +168,12 @@ function collectTargets(s, forceDocument) {
   if (forceDocument || s.scope === 'document') {
     return figma.loadAllPagesAsync().then(function () {
       var pages = figma.root.children;
-      for (var p = 0; p < pages.length; p++) walk(pages[p], s, out);
+      for (var p = 0; p < pages.length; p++) walk(pages[p], out);
       return out;
     });
   }
 
-  walk(figma.currentPage, s, out);
+  walk(figma.currentPage, out);
   return Promise.resolve(out);
 }
 
@@ -261,11 +252,9 @@ function statusFor(s) {
   });
 }
 
-// pendingCommand is the menu command that brought up the first-run guide, if any.
-function openUI(settings, pendingCommand) {
+function openUI(settings) {
   figma.showUI(__html__, { width: 380, height: 560, themeColors: true });
 
-  var view = settings.onboarded ? 'settings' : 'welcome';
   var ready = false;
   var pending = null;
 
@@ -274,8 +263,6 @@ function openUI(settings, pendingCommand) {
     return statusFor(settings).then(function (status) {
       figma.ui.postMessage({
         type: 'state',
-        view: view,
-        pendingCommand: pendingCommand || null,
         settings: settings,
         status: status,
         language: languageOf(settings) || 'en',
@@ -308,20 +295,6 @@ function openUI(settings, pendingCommand) {
       return;
     }
 
-    if (msg.type === 'welcome-done') {
-      settings.onboarded = true;
-      saveSettings(settings).then(function () {
-        if (msg.run && pendingCommand) {
-          return runCommand(pendingCommand, settings).then(function (result) {
-            figma.closePlugin(result.message);
-          });
-        }
-        view = 'settings';
-        return push();
-      }).catch(fail);
-      return;
-    }
-
     if (msg.type === 'settings') {
       for (var k in msg.settings) {
         if (k in DEFAULTS && !PLUGIN_OWNED[k]) settings[k] = msg.settings[k];
@@ -333,7 +306,10 @@ function openUI(settings, pendingCommand) {
     if (msg.type === 'run') {
       runCommand(msg.command, settings).then(function (result) {
         figma.notify(result.message);
-        push();
+        if (settings.onboarded) return push();
+        // From now on, menu commands and the shortcut run without opening this window.
+        settings.onboarded = true;
+        return saveSettings(settings).then(push);
       }).catch(fail);
       return;
     }
@@ -361,14 +337,10 @@ function openUI(settings, pendingCommand) {
 loadSettings().then(function (settings) {
   var command = figma.command || 'settings';
 
-  // The first run of any command explains how the plugin changes names before it does.
-  if (!settings.onboarded) {
-    openUI(settings, command === 'settings' ? null : command);
-    return;
-  }
-
-  if (command === 'settings') {
-    openUI(settings, null);
+  // Until names have been changed from the window once, every command opens it first,
+  // so people read how the plugin renames frames before it does.
+  if (command === 'settings' || !settings.onboarded) {
+    openUI(settings);
     return;
   }
 
