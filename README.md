@@ -2,11 +2,11 @@
 
 [한국어](README.ko.md)
 
-Frame Name Control is a free plugin for Figma that hides the frame name labels on the canvas and brings them back with one keyboard shortcut.
+Frame Name Control is a free plugin for Figma that hides the frame name labels on the canvas and brings them back with one click.
 
-![Press ⌘⌥F to hide frame name labels, and press it again to bring them back](assets/cover.gif)
+![Click Hide frame names to hide the labels on the canvas, then click again to bring them back](assets/cover.gif)
 
-Name labels help you find frames, but they clutter the canvas when you review a layout or share your screen. With Frame Name Control, one keypress clears them and the same keypress brings them back.
+Name labels help you find frames, but they clutter the canvas when you review a layout or share your screen. With Frame Name Control, one click clears them and another brings them back. There's nothing to set up.
 
 ## Install
 
@@ -16,7 +16,8 @@ Frame Name Control is coming soon to Figma Community. Once it's published, you c
 
 1. Open any design file in Figma.
 2. Press **⌘K** (Windows: **Ctrl+K**) to open **Actions**, then choose the **Plugins & widgets** tab.
-3. Search for **Frame Name Control** and run it.
+3. Search for **Frame Name Control** and choose **Open**.
+4. Click **Hide frame names**. Click it again to bring the names back.
 
 After the first run, the plugin shows up in your recent plugins, so it's easy to find again.
 
@@ -36,15 +37,15 @@ Manifest error: Expected "manifest.containsWidget" to have type true but got und
 
 ## Commands
 
-The first time you run any command, the plugin opens its window instead, so you can read how it changes names before you hide them. After you hide or restore names from the window once, commands run right away.
+Most of the time, **Open** is all you need: the plugin window has buttons to hide and restore names. The other commands do the same without the window. The first time you run one of them, the plugin opens its window instead, so you can read how it changes names before you hide them.
 
 | Menu | What it does |
 | --- | --- |
+| Open | Opens the plugin window. |
 | Toggle Frame Names | Hides names, or restores them if they're hidden. |
 | Hide Frame Name Labels | Hides names in the current scope. |
 | Show Frame Name Labels | Restores names in the current scope. |
 | Restore All Frame Names | Restores names on every page, whatever the scope. |
-| Frame Name Settings | Opens the plugin window. |
 
 ## Settings
 

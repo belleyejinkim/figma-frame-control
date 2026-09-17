@@ -192,9 +192,9 @@ test('selecting a section hides the frames inside it', async () => {
   assert.strictEqual(doc.n.inSection.name, BLANK);
 });
 
-test('Frame Name Settings opens the window and sends state after ready', async () => {
+test('Open opens the window and sends state after ready', async () => {
   const doc = buildDoc();
-  const r = await run(doc, 'settings', { language: 'ko-KR' });
+  const r = await run(doc, 'open', { language: 'ko-KR' });
   const state = r.uiMessages.find(m => m.type === 'state');
   assert.ok(r.shownUI[0].visible !== false);
   assert.strictEqual(state.language, 'ko');
@@ -270,10 +270,17 @@ test('closing the window without running keeps it for the next command', async (
   assert.strictEqual(store[SETTINGS_KEY].onboarded, false);
 });
 
+test('the old Settings command still opens the window', async () => {
+  const doc = buildDoc();
+  const r = await run(doc, 'settings');
+  assert.ok(r.uiMessages.some(m => m.type === 'state'));
+  assert.strictEqual(doc.n.a.name, 'A');
+});
+
 test('the window cannot reset onboarding or open arbitrary links', async () => {
   const doc = buildDoc();
   const store = {};
-  const r = await run(doc, 'settings', {
+  const r = await run(doc, 'open', {
     store,
     onState: (state, send, done) => {
       send({ type: 'settings', settings: Object.assign({}, state.settings, { onboarded: false, scope: 'document' }) });

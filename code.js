@@ -335,11 +335,12 @@ function openUI(settings) {
 /* -------------------------------------------------------------------- main */
 
 loadSettings().then(function (settings) {
-  var command = figma.command || 'settings';
+  var command = figma.command || 'open';
 
-  // Until names have been changed from the window once, every command opens it first,
-  // so people read how the plugin renames frames before it does.
-  if (command === 'settings' || !settings.onboarded) {
+  // Open shows the window with its buttons. Until names have been changed from the window
+  // once, the other commands open it too, so people read how the plugin renames frames first.
+  // 'settings' is the old name of Open; "Run last plugin" can still ask for it.
+  if (command === 'open' || command === 'settings' || !settings.onboarded) {
     openUI(settings);
     return;
   }

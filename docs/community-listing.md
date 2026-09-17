@@ -5,7 +5,7 @@ Copy these fields into the publish form (**Plugins → Manage plugins → Frame 
 | Field | Value |
 | --- | --- |
 | Name | Frame Name Control |
-| Tagline | Hide frame name labels on the canvas with one keyboard shortcut |
+| Tagline | Hide frame name labels on the canvas with one click |
 | Category | Design tools |
 | Icon | `assets/icon.png` (128 × 128) |
 | Thumbnail | `assets/cover.mp4` (video, 1920 × 1080). If the form rejects it, use `assets/cover.png`. |
@@ -19,7 +19,7 @@ Paste everything between the lines. The English part comes first, then Korean.
 
 ---
 
-Hide the name labels above frames and sections to see a clean canvas. Press the same shortcut to bring them back.
+Hide the name labels above frames and sections to see a clean canvas. Click again to bring them back. Nothing to set up.
 
 HIGHLIGHTS
 • Free
@@ -27,10 +27,10 @@ HIGHLIGHTS
 • Explains what it changes the first time you run it
 
 COMMANDS
+• Open: opens the plugin window with buttons to hide and restore names, plus the scope and language
 • Toggle Frame Names: hides names, or restores them if they're hidden
 • Hide Frame Name Labels / Show Frame Name Labels
 • Restore All Frame Names: restores every page, whatever the scope
-• Frame Name Settings: opens the plugin window with the status, scope (this page, all pages, selection), and language
 
 HOW IT WORKS
 Figma's plugin API can't switch off canvas labels. The plugin renames each frame to an invisible character (U+2800) and stores the original name in the layer's plugin data. Because of that:
@@ -45,7 +45,7 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 
 ―――――
 
-캔버스의 프레임·섹션 이름 라벨을 숨겨 화면을 깔끔하게 보고, 같은 단축키로 다시 켭니다.
+캔버스의 프레임·섹션 이름 라벨을 숨겨 화면을 깔끔하게 보고, 다시 한 번 눌러 켭니다. 따로 설정할 것은 없습니다.
 
 특징
 • 무료입니다
@@ -53,10 +53,10 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 • 처음 실행할 때 무엇을 바꾸는지 안내합니다
 
 명령
+• Open: 이름을 숨기고 되돌리는 버튼과 적용 범위, 언어가 있는 플러그인 창을 엽니다
 • Toggle Frame Names: 이름을 숨기고, 숨겨져 있으면 되돌립니다
 • Hide Frame Name Labels / Show Frame Name Labels
 • Restore All Frame Names: 범위와 상관없이 모든 페이지를 되돌립니다
-• Frame Name Settings: 현재 상태, 적용 범위(이 페이지, 모든 페이지, 선택 영역), 언어를 보는 플러그인 창을 엽니다
 
 동작 방식
 Figma 플러그인 API로는 캔버스 라벨을 끌 수 없습니다. 그래서 프레임 이름을 보이지 않는 문자(U+2800)로 바꾸고, 원래 이름은 레이어의 plugin data에 보관합니다. 이 방식에는 이런 특징이 있습니다.
