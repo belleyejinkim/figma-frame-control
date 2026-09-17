@@ -6,62 +6,41 @@ Frame Name Control is a free plugin for Figma that hides the frame name labels o
 
 ![Press ⌘⌥F to hide frame name labels, and press it again to bring them back](assets/cover.gif)
 
-Name labels help you find frames, but they clutter the canvas when you review a layout or share your screen. With Frame Name Control, one keypress clears them and the same keypress brings them back. Its menu commands keep fixed names, which lets you bind a macOS keyboard shortcut.
+Name labels help you find frames, but they clutter the canvas when you review a layout or share your screen. With Frame Name Control, one keypress clears them and the same keypress brings them back.
 
 ## Install
 
-**Figma Community**: coming soon. The link will appear here once Figma approves the plugin.
+### In Figma
 
-**From source**
+Frame Name Control is coming soon to Figma Community. Once it's published, you can install it without leaving Figma:
+
+1. Open any design file in Figma.
+2. Press **⌘K** (Windows: **Ctrl+K**) to open **Actions**, then choose the **Plugins & widgets** tab.
+3. Search for **Frame Name Control** and run it.
+
+After the first run, the plugin shows up in your recent plugins, so it's easy to find again.
+
+### From source
+
+Use this to develop the plugin or to try changes before they're published. It needs the Figma desktop app.
 
 1. Download this repository (**Code → Download ZIP**) and unzip it.
 2. Open any design file in the Figma desktop app.
 3. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json`.
 
-You import the plugin once, and it appears in every file. The first time you run a command, the plugin opens its window instead, so you can read how it changes names before you hide them.
-
-Import through the **Plugins** menu, not **Widgets**. Importing through Widgets fails with this error:
+You import the plugin once, and it appears in every file. Import through the **Plugins** menu, not **Widgets**. Importing through Widgets fails with this error:
 
 ```
 Manifest error: Expected "manifest.containsWidget" to have type true but got undefined instead
 ```
 
-## Set up a shortcut (macOS)
-
-1. Open **System Settings → Keyboard → Keyboard Shortcuts… → App Shortcuts**.
-2. Click **+**, choose **Figma**, and enter the menu title `Toggle Frame Names` exactly.
-3. Click the shortcut field, press **⌥⌘F**, and click **Done**.
-4. Quit Figma with **⌘Q** and open it again.
-
-⌥⌘F is awkward to press with one hand. Hold **⌘⌥** on the right side of the keyboard with your right hand, and press **F** with your left.
-
-You can also register the shortcut from Terminal:
-
-```bash
-./scripts/set-shortcut.sh cmd+opt+f     # set
-./scripts/set-shortcut.sh --list        # check
-./scripts/set-shortcut.sh --remove      # remove
-```
-
-### Why the shortcut needs ⌘
-
-A shortcut like ⇧F registers and even shows up in the menu, but pressing it does nothing. Keys without ⌘ go to Figma's canvas before the menu sees them. If you type in a language like Korean, the input method also turns the key into a character first. A shortcut with ⌘ gets past both, as long as Figma doesn't already use it.
-
-Figma already uses ⌘F (Find) and ⇧⌘F (Find Next), but ⌥⌘F is free. Avoid ⌥⌘H, which macOS uses for Hide Others.
-
-### Without setup
-
-Run the plugin once, then press **⌥⌘P** (Run last plugin). Until you run a different plugin, ⌥⌘P toggles frame names.
-
-### Windows
-
-App shortcuts are a macOS feature. On Windows, run the plugin once, then press **Ctrl+Alt+P** to run it again.
-
 ## Commands
+
+The first time you run any command, the plugin opens its window instead, so you can read how it changes names before you hide them. After you hide or restore names from the window once, commands run right away.
 
 | Menu | What it does |
 | --- | --- |
-| Toggle Frame Names | Hides names, or restores them if they're hidden. Bind your shortcut to this command. |
+| Toggle Frame Names | Hides names, or restores them if they're hidden. |
 | Hide Frame Name Labels | Hides names in the current scope. |
 | Show Frame Name Labels | Restores names in the current scope. |
 | Restore All Frame Names | Restores names on every page, whatever the scope. |
@@ -88,22 +67,12 @@ This approach has side effects:
 
 If you rename a layer while its name is hidden, the plugin keeps your new name when it restores the others.
 
-## Troubleshooting
-
-**The shortcut does nothing**
-
-1. Run `./scripts/set-shortcut.sh --list` and check that the title reads `Toggle Frame Names` exactly.
-2. Quit Figma with **⌘Q** and open it again. Closing the window isn't enough.
-3. Find **Frame Name Control** in the **Plugins** menu and check that your shortcut appears next to `Toggle Frame Names`. If it doesn't, Figma hasn't loaded the new setting yet.
-4. If the shortcut appears but still does nothing, make sure it includes **⌘**.
-
 ## Development
 
 ```
 manifest.json            plugin definition and menu commands
 code.js                  hide and restore logic (no build step)
 ui.html                  plugin window
-scripts/set-shortcut.sh  registers a macOS app shortcut
 test/logic.test.js       tests for the hide and restore logic
 assets/                  Figma Community icon, cover image, GIF, and video
 ```
