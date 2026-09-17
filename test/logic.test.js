@@ -43,11 +43,13 @@ function buildDoc() {
   };
 }
 
-// Resolves when the plugin closes, or when the settings UI receives its first state.
+// Resolves when the plugin closes, or when the UI receives its first state (unless
+// opts.onState handles it). Tests start as returning users unless settings say otherwise.
 function run(doc, command, opts = {}) {
   const store = opts.store || {};
-  if ('settings' in opts) store[SETTINGS_KEY] = opts.settings;
-  const result = { closed: null, shownUI: [], uiMessages: [], store };
+  if ('settings' in opts) store[SETTINGS_KEY] = Object.assign({ onboarded: true }, opts.settings);
+  else if (!store[SETTINGS_KEY]) store[SETTINGS_KEY] = { onboarded: true };
+  const result = { closed: null, shownUI: [], uiMessages: [], opened: [], resized: [], store };
   doc.page1.selection = opts.selection || [];
 
   return new Promise((resolve, reject) => {
@@ -58,8 +60,11 @@ function run(doc, command, opts = {}) {
       onmessage: null,
       postMessage(msg) {
         result.uiMessages.push(msg);
-        if (msg.type === 'state') finish();
-      }
+        if (msg.type !== 'state') return;
+        if (opts.onState) setImmediate(() => opts.onState(msg, reply => ui.onmessage(reply), finish));
+        else finish();
+      },
+      resize(width, height) { result.resized.push([width, height]); }
     };
 
     const figma = {
@@ -72,6 +77,7 @@ function run(doc, command, opts = {}) {
         setAsync: (key, value) => { store[key] = JSON.parse(JSON.stringify(value)); return Promise.resolve(); }
       },
       loadAllPagesAsync: () => Promise.resolve(),
+      openExternal(url) { result.opened.push(url); },
       notify() {},
       on() {},
       closePlugin(message) { result.closed = message; finish(); },
@@ -212,6 +218,78 @@ test('a language override skips detection', async () => {
   const r = await run(doc, 'toggle', { settings: { language: 'en' }, language: 'ko-KR' });
   assert.strictEqual(r.shownUI.length, 0);
   assert.match(r.closed, /^Hid /);
+});
+
+test('the first run shows the guide instead of renaming right away', async () => {
+  const doc = buildDoc();
+  const r = await run(doc, 'toggle', { settings: { onboarded: false } });
+  const state = r.uiMessages.find(m => m.type === 'state');
+  assert.strictEqual(state.view, 'welcome');
+  assert.strictEqual(state.pendingCommand, 'toggle');
+  assert.ok(r.shownUI[0].visible !== false);
+  assert.strictEqual(doc.n.a.name, 'A');
+});
+
+test('confirming the guide runs the pending command and remembers it', async () => {
+  const doc = buildDoc();
+  const store = {};
+  const r = await run(doc, 'toggle', {
+    store,
+    settings: { onboarded: false },
+    onState: (state, send) => send({ type: 'welcome-done', run: true })
+  });
+  assert.match(r.closed, /^Hid \d+ names/);
+  assert.strictEqual(doc.n.a.name, BLANK);
+  assert.strictEqual(store[SETTINGS_KEY].onboarded, true);
+
+  const next = await run(doc, 'toggle', { store });
+  assert.strictEqual(next.shownUI.length, 0);
+  assert.strictEqual(doc.n.a.name, 'A');
+});
+
+test('"Not now" closes without renaming and shows the guide again next time', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'hide', {
+    store,
+    settings: { onboarded: false },
+    onState: (state, send) => send({ type: 'close' })
+  });
+  assert.strictEqual(doc.n.a.name, 'A');
+  assert.strictEqual(store[SETTINGS_KEY].onboarded, false);
+});
+
+test('the guide opened from settings continues to the settings view', async () => {
+  const doc = buildDoc();
+  const views = [];
+  await run(doc, 'settings', {
+    settings: { onboarded: false },
+    onState: (state, send, done) => {
+      views.push(state.view);
+      if (state.view === 'welcome') send({ type: 'welcome-done', run: false });
+      else done();
+    }
+  });
+  assert.deepStrictEqual(views, ['welcome', 'settings']);
+});
+
+test('the UI cannot reset onboarding or open arbitrary links', async () => {
+  const doc = buildDoc();
+  const store = {};
+  const r = await run(doc, 'settings', {
+    store,
+    onState: (state, send, done) => {
+      send({ type: 'settings', settings: Object.assign({}, state.settings, { onboarded: false, scope: 'document' }) });
+      send({ type: 'open', link: 'feedback' });
+      send({ type: 'open', link: 'https://example.com' });
+      send({ type: 'resize', height: 5000 });
+      setImmediate(done);
+    }
+  });
+  assert.strictEqual(store[SETTINGS_KEY].onboarded, true);
+  assert.strictEqual(store[SETTINGS_KEY].scope, 'document');
+  assert.deepStrictEqual(r.opened, ['https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml']);
+  assert.deepStrictEqual(r.resized, [[380, 680]]);
 });
 
 (async () => {

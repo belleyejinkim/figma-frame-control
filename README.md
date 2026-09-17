@@ -18,7 +18,7 @@ Name labels help you find frames, but they clutter the canvas when you review a 
 2. Open any design file in the Figma desktop app.
 3. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json`.
 
-You import the plugin once, and it appears in every file.
+You import the plugin once, and it appears in every file. The first time you run a command, the plugin explains how it changes names and waits for you to confirm.
 
 Import through the **Plugins** menu, not **Widgets**. Importing through Widgets fails with this error:
 
@@ -122,6 +122,14 @@ The icon and cover assets are built from the HTML files in `assets/src`. Rebuild
 ```bash
 python3 assets/src/build.py
 ```
+
+## Feedback
+
+Found a bug or have an idea? Choose **Send feedback** at the bottom of the plugin window, or [open an issue](https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml).
+
+## Author
+
+Made by Belle Kim · [LinkedIn](https://www.linkedin.com/in/belleyejinkim/)
 
 ## License
 

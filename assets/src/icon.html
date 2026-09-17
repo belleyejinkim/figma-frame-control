@@ -2,35 +2,32 @@
 <meta charset="utf-8">
 <title>Frame Name Control icon</title>
 <style>
-  html, body { margin: 0; background: #111318; }
+  html, body { margin: 0; background: #2C2C2C; }
   svg { display: block; }
   text { font-family: -apple-system, "SF Pro Display", "Helvetica Neue", sans-serif; font-weight: 600; }
 </style>
-<!-- Render at 512 × 512, then scale to 128 × 128. Keys read ⌘ ⌥ F, the order the right hand meets them. -->
+<!--
+  Render at 512 × 512, then scale to 128 × 128. Figma shows the same icon at about 20 pt in
+  plugin search, so the keys fill the width: ⌥ and F stay readable at 40 px.
+  Keys read ⌘ ⌥ F, the order the right hand meets them.
+-->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <rect width="512" height="512" fill="#111318"/>
+  <rect width="512" height="512" fill="#2C2C2C"/>
 
-  <!-- hidden name label and frame -->
-  <rect x="70" y="82" width="150" height="36" rx="18" fill="#FFFFFF" opacity="0.26"/>
-  <rect x="70" y="144" width="372" height="196" rx="24" fill="none" stroke="#FFFFFF" stroke-width="20"/>
+  <!-- frame, peeking out above the keys -->
+  <rect x="58" y="100" width="396" height="220" rx="32" fill="none" stroke="#FFFFFF" stroke-width="26"/>
+  <rect x="17" y="238" width="478" height="186" rx="48" fill="#2C2C2C"/>
 
-  <!-- keys: ⌘ ⌥ F -->
-  <g transform="translate(46 292)">
-    <rect x="-10" y="-10" width="440" height="160" rx="40" fill="#111318"/>
-    <g>
-      <rect y="14" width="128" height="124" rx="30" fill="#B9BCC2"/>
-      <rect width="128" height="124" rx="30" fill="#F4F4F2"/>
-      <text x="64" y="86" text-anchor="middle" font-size="70" fill="#1A1C21">⌘</text>
-    </g>
-    <g transform="translate(146 0)">
-      <rect y="14" width="128" height="124" rx="30" fill="#B9BCC2"/>
-      <rect width="128" height="124" rx="30" fill="#F4F4F2"/>
-      <text x="64" y="86" text-anchor="middle" font-size="70" fill="#1A1C21">⌥</text>
-    </g>
-    <g transform="translate(292 0)">
-      <rect y="14" width="128" height="124" rx="30" fill="#0870C0"/>
-      <rect width="128" height="124" rx="30" fill="#0D99FF"/>
-      <text x="64" y="87" text-anchor="middle" font-size="72" fill="#FFFFFF">F</text>
-    </g>
-  </g>
+  <!-- ⌘ -->
+  <rect x="29" y="266" width="146" height="146" rx="34" fill="#B9BCC2"/>
+  <rect x="29" y="250" width="146" height="146" rx="34" fill="#F4F4F2"/>
+  <text x="102" y="360" text-anchor="middle" font-size="104" fill="#1A1C21">⌘</text>
+  <!-- ⌥ -->
+  <rect x="185" y="266" width="146" height="146" rx="34" fill="#B9BCC2"/>
+  <rect x="185" y="250" width="146" height="146" rx="34" fill="#F4F4F2"/>
+  <text x="258" y="360" text-anchor="middle" font-size="104" fill="#1A1C21">⌥</text>
+  <!-- F -->
+  <rect x="341" y="266" width="146" height="146" rx="34" fill="#0870C0"/>
+  <rect x="341" y="250" width="146" height="146" rx="34" fill="#0D99FF"/>
+  <text x="414" y="360" text-anchor="middle" font-size="104" fill="#FFFFFF">F</text>
 </svg>

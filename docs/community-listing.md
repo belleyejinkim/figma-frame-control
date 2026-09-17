@@ -25,6 +25,7 @@ HIGHLIGHTS
 • Free
 • Menu commands keep fixed names, so you can bind a macOS keyboard shortcut to them
 • Restores the exact original names, even after you close and reopen the file
+• Explains what it changes the first time you run it
 
 SET UP A SHORTCUT (macOS desktop app)
 1. Open System Settings → Keyboard → Keyboard Shortcuts… → App Shortcuts.
@@ -49,6 +50,8 @@ Figma's plugin API can't switch off canvas labels. The plugin renames each frame
 • ⌘Z brings names back, and version history is a safe fallback
 • Variant components are never renamed, and instances are off by default
 
+Feedback: https://github.com/belleyejinkim/figma-frame-control/issues
+Made by Belle Kim · https://www.linkedin.com/in/belleyejinkim/
 Source code: https://github.com/belleyejinkim/figma-frame-control
 
 ―――――
@@ -59,6 +62,7 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 • 무료입니다
 • 메뉴 명령 이름이 바뀌지 않아 macOS 단축키를 붙일 수 있습니다
 • 파일을 닫았다 열어도 원래 이름을 정확히 되돌립니다
+• 처음 실행할 때 무엇을 바꾸는지 안내합니다
 
 단축키 지정 (macOS 데스크톱 앱)
 1. 시스템 설정 → 키보드 → 키보드 단축키… → 앱 단축키를 엽니다.
@@ -83,6 +87,8 @@ Figma 플러그인 API로는 캔버스 라벨을 끌 수 없습니다. 그래서
 • ⌘Z나 버전 기록으로 되돌릴 수 있습니다
 • 배리언트 컴포넌트는 이름을 바꾸지 않고, 인스턴스는 기본으로 빠져 있습니다
 
+피드백: https://github.com/belleyejinkim/figma-frame-control/issues
+만든 사람: Belle Kim · https://www.linkedin.com/in/belleyejinkim/
 소스 코드: https://github.com/belleyejinkim/figma-frame-control
 
 ---

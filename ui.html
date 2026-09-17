@@ -30,6 +30,7 @@
   }
 
   .wrap { padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+  .view { display: flex; flex-direction: column; gap: 10px; }
 
   .panel {
     border: 1px solid var(--border);
@@ -142,6 +143,25 @@
 
   .divider { height: 1px; background: var(--border); margin: 1px 0; }
 
+  button:disabled { opacity: 0.6; cursor: default; }
+
+  .lead { margin: 0; font-size: 12px; line-height: 1.5; color: var(--text); }
+  .subhead { margin: 0; font-weight: 600; color: var(--text); }
+
+  ul.bullets { margin: 0; padding: 0; list-style: none; color: var(--text-2); }
+  ul.bullets li { position: relative; padding-left: 12px; margin-bottom: 4px; }
+  ul.bullets li:last-child { margin-bottom: 0; }
+  ul.bullets li::before { content: "•"; position: absolute; left: 0; }
+  ul.bullets b { color: var(--text); font-weight: 600; }
+
+  .links { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 14px; padding: 0 2px 2px; }
+  .link {
+    border: 0; border-radius: 0; background: none; padding: 2px 0;
+    color: var(--text-2); cursor: pointer;
+  }
+  .link:hover { background: none; color: var(--text); text-decoration: underline; }
+  .link.static, .link.static:hover { cursor: default; color: var(--text-2); text-decoration: none; }
+
   .row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; }
   .row label { font-weight: 600; }
   .row select { padding: 5px 6px; }
@@ -160,6 +180,38 @@
 </style>
 
 <div class="wrap">
+
+  <div class="view" id="view-welcome" hidden>
+    <section class="panel">
+      <div class="panel-head" data-i18n="welcomeTitle"></div>
+      <div class="panel-body">
+        <p class="lead" data-i18n="welcomeLead"></p>
+        <div class="group">
+          <p class="subhead" data-i18n="howTitle"></p>
+          <ul class="bullets">
+            <li data-i18n-html="how1"></li>
+            <li data-i18n-html="how2"></li>
+          </ul>
+        </div>
+        <div class="group">
+          <p class="subhead" data-i18n="noteTitle"></p>
+          <ul class="bullets">
+            <li data-i18n-html="note1"></li>
+            <li data-i18n-html="note2"></li>
+          </ul>
+        </div>
+        <div class="group">
+          <p class="subhead" data-i18n="shortcutTitle"></p>
+          <p class="hint" id="welcome-shortcut"></p>
+        </div>
+        <div class="divider"></div>
+        <button class="primary" id="btn-welcome"></button>
+        <button id="btn-later" data-i18n="notNow"></button>
+      </div>
+    </section>
+  </div>
+
+  <div class="view" id="view-settings" hidden>
 
   <section class="panel">
     <div class="panel-head" data-i18n="statusTitle"></div>
@@ -237,6 +289,15 @@
     </div>
   </section>
 
+  </div>
+
+  <nav class="links">
+    <button class="link" id="link-how" data-i18n="linkHow"></button>
+    <button class="link" data-open="feedback" data-i18n="linkFeedback"></button>
+    <button class="link" data-open="github">GitHub</button>
+    <button class="link" id="link-author" data-open="linkedin" data-i18n="madeBy"></button>
+  </nav>
+
 </div>
 
 <div id="toast"></div>
@@ -293,7 +354,25 @@
       toastKeyType: 'Use a letter, number, or symbol key',
       toastCopied: 'Copied',
       toastCopyFailed: 'Couldn\'t copy. Select the text instead.',
-      toastRecordFirst: 'Record a shortcut with ⌘ first'
+      toastRecordFirst: 'Record a shortcut with ⌘ first',
+      welcomeTitle: 'Welcome to Frame Name Control',
+      welcomeLead: 'Hide the name labels on your canvas, then bring them back with the same command.',
+      howTitle: 'How it works',
+      how1: 'Figma has no switch for canvas labels, so the plugin <b>temporarily renames</b> frames and sections to an invisible character.',
+      how2: 'The original names are saved in the file. <b>Run the command again</b>, choose <b>Restore all</b>, or press <b>⌘Z</b> to bring them back.',
+      noteTitle: 'Good to know',
+      note1: 'Names also look blank in the Layers panel, and people viewing the same file see the change.',
+      note2: 'Variant components are never renamed, and instances are skipped by default.',
+      welcomeShortcutMac: 'In System Settings, bind <b>⌥⌘F</b> to <code>Toggle Frame Names</code>. <b>Frame Name Settings</b> walks you through it.',
+      welcomeShortcutOther: 'Run the plugin once, then press <b>Ctrl+Alt+P</b> to run it again.',
+      welcomeHide: 'Got it, hide names',
+      welcomeRestore: 'Got it, restore names',
+      welcomeContinue: 'Got it',
+      welcomeBack: 'Back to settings',
+      notNow: 'Not now',
+      linkHow: 'How it works',
+      linkFeedback: 'Send feedback',
+      madeBy: 'Made by Belle Kim'
     },
     ko: {
       statusTitle: '현재 상태',
@@ -341,13 +420,37 @@
       toastKeyType: '문자, 숫자, 기호 키만 지정할 수 있습니다',
       toastCopied: '복사했습니다',
       toastCopyFailed: '복사하지 못했습니다. 직접 선택해 주세요',
-      toastRecordFirst: '⌘가 들어간 단축키를 먼저 지정하세요'
+      toastRecordFirst: '⌘가 들어간 단축키를 먼저 지정하세요',
+      welcomeTitle: 'Frame Name Control 사용 안내',
+      welcomeLead: '캔버스의 프레임 이름 라벨을 숨기고, 같은 명령으로 다시 켭니다.',
+      howTitle: '동작 방식',
+      how1: 'Figma에는 캔버스 라벨을 끄는 기능이 없어서, 프레임과 섹션의 이름을 <b>잠시 보이지 않는 문자로 바꿉니다</b>.',
+      how2: '원래 이름은 파일에 저장됩니다. <b>명령을 다시 실행</b>하거나 <b>전체 복구</b>를 누르거나 <b>⌘Z</b>를 누르면 돌아옵니다.',
+      noteTitle: '알아 두세요',
+      note1: '레이어 패널에서도 이름이 비어 보이고, 같은 파일을 보는 사람에게도 바뀐 이름이 보입니다.',
+      note2: '배리언트 컴포넌트는 이름을 바꾸지 않고, 인스턴스는 기본으로 건너뜁니다.',
+      welcomeShortcutMac: '시스템 설정에서 <code>Toggle Frame Names</code>에 <b>⌥⌘F</b>를 붙이세요. 방법은 <b>Frame Name Settings</b>에 있습니다.',
+      welcomeShortcutOther: '한 번 실행한 뒤 <b>Ctrl+Alt+P</b>를 누르면 다시 실행됩니다.',
+      welcomeHide: '확인하고 이름 숨기기',
+      welcomeRestore: '확인하고 이름 복구하기',
+      welcomeContinue: '확인',
+      welcomeBack: '설정으로 돌아가기',
+      notNow: '나중에',
+      linkHow: '사용 안내',
+      linkFeedback: '피드백 보내기',
+      madeBy: 'Made by Belle Kim'
     }
   };
 
   var language = 'en';
   var settings = null;
   var recording = false;
+  var view = 'settings';
+  var pendingCommand = null;
+  var lastStatus = { total: 0, hidden: 0 };   // not `status`: that is window.status, a string
+  var links = { linkedin: false };
+  var reopenedGuide = false;   // guide opened again from "How it works"
+  var lastHeight = 0;
 
   var $ = function (id) { return document.getElementById(id); };
   var t = function () { return TEXT[language] || TEXT.en; };
@@ -499,6 +602,64 @@
     el.addEventListener('click', function () { post({ type: 'run', command: el.dataset.cmd }); });
   });
 
+  /* ---------------------------------------------------------------- views */
+
+  function welcomeLabel() {
+    if (reopenedGuide) return t().welcomeBack;
+    if (pendingCommand === 'hide') return t().welcomeHide;
+    if (pendingCommand === 'show' || pendingCommand === 'restore-all') return t().welcomeRestore;
+    if (pendingCommand === 'toggle') return lastStatus.hidden > 0 ? t().welcomeRestore : t().welcomeHide;
+    return t().welcomeContinue;
+  }
+
+  function showView() {
+    var welcome = reopenedGuide || view === 'welcome';
+    $('view-welcome').hidden = !welcome;
+    $('view-settings').hidden = welcome;
+    $('link-how').hidden = welcome;
+    $('link-author').classList.toggle('static', !links.linkedin);
+
+    var primary = $('btn-welcome');
+    primary.textContent = welcomeLabel();
+    primary.disabled = false;
+    $('btn-later').hidden = reopenedGuide || !pendingCommand;
+    $('welcome-shortcut').innerHTML = IS_MAC ? t().welcomeShortcutMac : t().welcomeShortcutOther;
+
+    // Fit the window to the content. The plugin caps the height.
+    requestAnimationFrame(function () {
+      var height = document.body.scrollHeight;
+      if (Math.abs(height - lastHeight) > 4) {
+        lastHeight = height;
+        post({ type: 'resize', height: height });
+      }
+    });
+  }
+
+  $('btn-welcome').addEventListener('click', function () {
+    if (reopenedGuide) {
+      reopenedGuide = false;
+      showView();
+      return;
+    }
+    $('btn-welcome').disabled = true;
+    post({ type: 'welcome-done', run: !!pendingCommand });
+  });
+
+  $('btn-later').addEventListener('click', function () { post({ type: 'close' }); });
+
+  $('link-how').addEventListener('click', function () {
+    reopenedGuide = true;
+    showView();
+    window.scrollTo(0, 0);
+  });
+
+  document.querySelectorAll('[data-open]').forEach(function (el) {
+    el.addEventListener('click', function () {
+      if (el.classList.contains('static')) return;
+      post({ type: 'open', link: el.dataset.open });
+    });
+  });
+
   /* ---------------------------------------------------------------- toast */
 
   var toastTimer = null;
@@ -525,6 +686,10 @@
   function render(state) {
     settings = state.settings;
     language = TEXT[state.language] ? state.language : 'en';
+    view = state.view || 'settings';
+    pendingCommand = state.pendingCommand || null;
+    lastStatus = state.status;
+    links = state.links || links;
     applyText();
 
     $('stat-hidden').textContent = state.status.hidden;
@@ -549,6 +714,7 @@
     $('shortcut-mac').hidden = !IS_MAC;
     $('shortcut-other').hidden = IS_MAC;
     if (!recording) renderShortcut();
+    showView();
   }
 
   onmessage = function (event) {

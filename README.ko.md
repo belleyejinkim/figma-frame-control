@@ -18,7 +18,7 @@
 2. Figma 데스크톱 앱에서 디자인 파일을 아무거나 엽니다.
 3. **Plugins → Development → Import plugin from manifest…** 메뉴를 고르고 `manifest.json`을 선택합니다.
 
-한 번만 불러오면 모든 파일에서 쓸 수 있습니다.
+한 번만 불러오면 모든 파일에서 쓸 수 있습니다. 처음 명령을 실행하면 이름을 어떻게 바꾸는지 안내하고, 확인을 누른 다음에 실행합니다.
 
 **Widgets** 메뉴가 아니라 **Plugins** 메뉴로 불러와야 합니다. Widgets 메뉴로 불러오면 아래 에러가 납니다.
 
@@ -122,6 +122,14 @@ node test/logic.test.js
 ```bash
 python3 assets/src/build.py
 ```
+
+## 피드백
+
+버그를 찾았거나 아이디어가 있다면 플러그인 창 아래쪽의 **피드백 보내기**를 누르거나 [이슈를 남겨 주세요](https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml).
+
+## 만든 사람
+
+Belle Kim · [LinkedIn](https://www.linkedin.com/in/belleyejinkim/)
 
 ## 라이선스
 

@@ -13,14 +13,19 @@
   html, body { margin: 0; }
   body {
     width: 1920px; height: 1080px; overflow: hidden; position: relative;
-    background: #111318; color: #FFFFFF;
+    background: #2C2C2C; color: #FFFFFF;
     font-family: "Pretendard", "Inter", -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   [hidden] { display: none !important; }
 
   .copy { position: absolute; left: 150px; top: 208px; width: 760px; }
-  .eyebrow { font-size: 26px; font-weight: 600; letter-spacing: 0.18em; color: #7F8590; margin: 0 0 34px; }
+  .eyebrow {
+    display: flex; align-items: center; margin: 0 0 31px;
+    font-size: 28px; line-height: 1; font-weight: 500; letter-spacing: 0.1em; color: #F5F5F3;
+  }
+  /* The Figma mark is used as-is and stays smaller than the plugin name, per Figma's brand guidelines. */
+  .eyebrow svg { flex: none; width: 21px; height: 31.5px; margin: 0 26px 0 10px; }
   h1 { font-size: 118px; line-height: 1.02; font-weight: 800; letter-spacing: -0.035em; margin: 0 0 36px; }
   .tagline { font-size: 40px; line-height: 1.35; color: #B6BBC4; margin: 0 0 76px; font-weight: 500; }
 
@@ -73,7 +78,16 @@
 </style>
 
 <div class="copy">
-  <p class="eyebrow">FIGMA PLUGIN</p>
+  <p class="eyebrow">
+    <svg viewBox="0 0 38 57" aria-hidden="true">
+      <path fill="#00B6FF" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/>
+      <path fill="#24CB71" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/>
+      <path fill="#FF7237" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/>
+      <path fill="#FF3737" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/>
+      <path fill="#874FFF" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/>
+    </svg>
+    <span>Figma PLUGIN</span>
+  </p>
   <h1>Frame Name<br>Control</h1>
   <p class="tagline">Hide frame name labels on the canvas with one keyboard shortcut.</p>
   <div class="keys">

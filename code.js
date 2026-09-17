@@ -13,6 +13,13 @@ var KEY_ORIGINAL = 'fnc_original';
 var KEY_HIDDEN = 'fnc_hidden';
 var SETTINGS_KEY = 'frame-name-control/settings';
 
+// Opened with figma.openExternal, so the plugin itself needs no network access.
+var LINKS = {
+  feedback: 'https://github.com/belleyejinkim/figma-frame-control/issues/new?template=feedback.yml',
+  github: 'https://github.com/belleyejinkim/figma-frame-control',
+  linkedin: 'https://www.linkedin.com/in/belleyejinkim/'
+};
+
 var DEFAULTS = {
   scope: 'page',            // 'page' | 'document' | 'selection'
   includeNested: false,
@@ -22,8 +29,12 @@ var DEFAULTS = {
   shortcutLabel: '',        // shown in the UI, e.g. "⌥⌘F"
   shortcutSpec: '',         // macOS NSUserKeyEquivalents string, e.g. "~@f"
   language: 'auto',         // 'auto' | 'en' | 'ko'
-  detectedLanguage: ''      // last language reported by a UI iframe
+  detectedLanguage: '',     // last language reported by a UI iframe
+  onboarded: false          // the first-run guide has been confirmed
 };
+
+// Only the plugin changes these. The UI's copy can be stale.
+var PLUGIN_OWNED = { detectedLanguage: true, onboarded: true };
 
 /* -------------------------------------------------------------------- i18n */
 
@@ -250,9 +261,11 @@ function statusFor(s) {
   });
 }
 
-function openUI(settings) {
-  figma.showUI(__html__, { width: 380, height: 680, themeColors: true });
+// pendingCommand is the menu command that brought up the first-run guide, if any.
+function openUI(settings, pendingCommand) {
+  figma.showUI(__html__, { width: 380, height: 560, themeColors: true });
 
+  var view = settings.onboarded ? 'settings' : 'welcome';
   var ready = false;
   var pending = null;
 
@@ -261,9 +274,12 @@ function openUI(settings) {
     return statusFor(settings).then(function (status) {
       figma.ui.postMessage({
         type: 'state',
+        view: view,
+        pendingCommand: pendingCommand || null,
         settings: settings,
         status: status,
-        language: languageOf(settings) || 'en'
+        language: languageOf(settings) || 'en',
+        links: { linkedin: !!LINKS.linkedin }
       });
     });
   }
@@ -272,6 +288,10 @@ function openUI(settings) {
   function schedulePush() {
     if (pending) clearTimeout(pending);
     pending = setTimeout(function () { pending = null; push(); }, 150);
+  }
+
+  function fail(err) {
+    figma.notify(messagesFor(settings).error + err.message, { error: true });
   }
 
   figma.ui.onmessage = function (msg) {
@@ -288,9 +308,23 @@ function openUI(settings) {
       return;
     }
 
+    if (msg.type === 'welcome-done') {
+      settings.onboarded = true;
+      saveSettings(settings).then(function () {
+        if (msg.run && pendingCommand) {
+          return runCommand(pendingCommand, settings).then(function (result) {
+            figma.closePlugin(result.message);
+          });
+        }
+        view = 'settings';
+        return push();
+      }).catch(fail);
+      return;
+    }
+
     if (msg.type === 'settings') {
       for (var k in msg.settings) {
-        if (k in DEFAULTS && k !== 'detectedLanguage') settings[k] = msg.settings[k];
+        if (k in DEFAULTS && !PLUGIN_OWNED[k]) settings[k] = msg.settings[k];
       }
       saveSettings(settings).then(push);
       return;
@@ -300,9 +334,18 @@ function openUI(settings) {
       runCommand(msg.command, settings).then(function (result) {
         figma.notify(result.message);
         push();
-      }).catch(function (err) {
-        figma.notify(messagesFor(settings).error + err.message, { error: true });
-      });
+      }).catch(fail);
+      return;
+    }
+
+    if (msg.type === 'open') {
+      if (LINKS[msg.link]) figma.openExternal(LINKS[msg.link]);
+      return;
+    }
+
+    if (msg.type === 'resize') {
+      var height = Math.round(Math.max(240, Math.min(680, Number(msg.height) || 560)));
+      figma.ui.resize(380, height);
       return;
     }
 
@@ -318,8 +361,14 @@ function openUI(settings) {
 loadSettings().then(function (settings) {
   var command = figma.command || 'settings';
 
+  // The first run of any command explains how the plugin changes names before it does.
+  if (!settings.onboarded) {
+    openUI(settings, command === 'settings' ? null : command);
+    return;
+  }
+
   if (command === 'settings') {
-    openUI(settings);
+    openUI(settings, null);
     return;
   }
 
