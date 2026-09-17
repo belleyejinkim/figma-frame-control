@@ -10,8 +10,10 @@ const SRC = fs.readFileSync(path.join(__dirname, '..', 'code.js'), 'utf8');
 const BLANK = '⠀';
 const SETTINGS_KEY = 'frame-name-control/settings';
 
-function node(type, name, children) {
-  const n = { type, name, pluginData: {}, relaunch: {}, relaunchWrites: 0 };
+let nextId = 1;
+
+function node(type, name, children, id) {
+  const n = { id: id || '1:' + nextId++, type, name, pluginData: {}, relaunch: {}, relaunchWrites: 0 };
   n.getPluginData = key => n.pluginData[key] || '';
   n.setPluginData = (key, value) => { n.pluginData[key] = value; };
   n.getRelaunchData = () => n.relaunch;
@@ -20,6 +22,15 @@ function node(type, name, children) {
     n.children = children;
     children.forEach(child => { child.parent = n; });
   }
+  n.findAllWithCriteria = ({ types }) => {
+    const out = [];
+    const visit = parent => (parent.children || []).forEach(child => {
+      if (types.includes(child.type)) out.push(child);
+      visit(child);
+    });
+    visit(n);
+    return out;
+  };
   return n;
 }
 
@@ -33,7 +44,8 @@ function buildDoc() {
   const variant = node('COMPONENT', 'Size=Large');
   const componentSet = node('COMPONENT_SET', 'Button', [variant]);
   const component = node('COMPONENT', 'Icon');
-  const instance = node('INSTANCE', 'Button Instance');
+  const insideInstance = node('FRAME', 'Inside Instance', null, 'I1:99;2:1');
+  const instance = node('INSTANCE', 'Button Instance', [insideInstance]);
   const a = node('FRAME', 'A');
   const b = node('FRAME', 'B');
   const page1 = node('PAGE', 'Page 1', [a, b, section, group, componentSet, component, instance, parentFrame]);
@@ -41,7 +53,7 @@ function buildDoc() {
   const root = node('DOCUMENT', 'Doc', [page1, page2]);
   return {
     root, page1, page2,
-    n: { a, b, section, inSection, group, inGroup, componentSet, variant, component, instance, parentFrame, child }
+    n: { a, b, section, inSection, group, inGroup, componentSet, variant, component, instance, insideInstance, parentFrame, child }
   };
 }
 
@@ -308,19 +320,28 @@ test('running a command adds the right panel button once per file', async () => 
   assert.strictEqual(doc.root.relaunchWrites, 1);
 });
 
-test('frames, sections, and components get the button for when they are selected', async () => {
+test('every frame on the page gets the button, including nested frames', async () => {
   const doc = buildDoc();
   const store = {};
   await run(doc, 'toggle', { store });
-  for (const key of ['a', 'section', 'inSection', 'inGroup', 'component', 'componentSet']) {
+  for (const key of ['a', 'section', 'inSection', 'inGroup', 'parentFrame', 'child', 'component', 'componentSet', 'variant']) {
     assert.ok('toggle' in doc.n[key].relaunch, key + ' should carry the button');
   }
-  for (const key of ['child', 'instance', 'variant', 'group']) {
+  for (const key of ['instance', 'insideInstance', 'group']) {
     assert.strictEqual(doc.n[key].relaunchWrites, 0, key + ' should not carry the button');
   }
+  assert.strictEqual(doc.n.child.name, 'Child', 'nested frames still keep their names');
+  assert.strictEqual(doc.page2.children[0].relaunchWrites, 0, 'other pages wait until the plugin runs there');
+
   await run(doc, 'toggle', { store });
   assert.strictEqual(doc.n.a.relaunchWrites, 1);
   assert.ok('toggle' in doc.n.a.relaunch, 'restoring names keeps the button');
+});
+
+test('all-pages scope adds the button on every page', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { scope: 'document' } });
+  assert.ok('toggle' in doc.page2.children[0].relaunch);
 });
 
 test('a button someone removed from a layer is not added back', async () => {

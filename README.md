@@ -49,7 +49,7 @@ Most of the time, **Open** is all you need: the plugin window has buttons to hid
 
 ### Right panel button
 
-After the plugin runs a command in a file, a **Hide/Show Frame Name** button appears under **Tools** in the right panel. You see it when nothing is selected, and when you select frames, sections, or components the plugin has handled. Click it to hide or show names without opening a menu. It follows the plugin's scope, so it changes the whole page unless the scope is set to selected layers.
+After the plugin runs a command in a file, a **Hide/Show Frame Name** button appears under **Tools** in the right panel. You see it when nothing is selected, and when you select any frame, section, or component on a page where the plugin has run. Frames you add later get it the next time the plugin runs on that page. Layers inside instances can't carry it. Click it to hide or show names without opening a menu. It follows the plugin's scope, so it changes the whole page unless the scope is set to selected layers.
 
 The button is saved with the file, so people who open the file see it too. To remove it from a layer, click **−** next to it. The plugin won't add it back.
 

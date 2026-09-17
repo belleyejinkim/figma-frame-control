@@ -215,9 +215,22 @@ function countHidden(targets) {
 
 /* ---------------------------------------------------------------- commands */
 
-// Puts a "Hide/Show Frame Name" button in the right panel. Figma shows it when nothing is
-// selected (data on the document) and when the selected layers carry the data themselves,
-// so it goes on the document and on every frame, section, and component the plugin handles.
+// Puts a "Hide/Show Frame Name" button under Tools in the right panel. Figma shows it when
+// nothing is selected (data on the document) and when every selected layer carries the data
+// itself, so it also goes on each frame, section, and component on the pages the command covers.
+var BUTTON_TYPES = ['FRAME', 'SECTION', 'COMPONENT', 'COMPONENT_SET'];
+
+function addButtons(pages) {
+  ensureRelaunchButton(figma.root);
+  for (var p = 0; p < pages.length; p++) {
+    var nodes = pages[p].findAllWithCriteria({ types: BUTTON_TYPES });
+    for (var i = 0; i < nodes.length; i++) {
+      // Layers inside instances have ids starting with "I" and can't be changed.
+      if (nodes[i].id.charAt(0) !== 'I') ensureRelaunchButton(nodes[i]);
+    }
+  }
+}
+
 function ensureRelaunchButton(node) {
   try {
     // Once added, leave it alone: people can remove it with the "−" next to the button.
@@ -235,8 +248,7 @@ function runCommand(command, s) {
   var scopeKey = forceDocument ? 'document' : (t.scope[s.scope] ? s.scope : 'page');
 
   return collectTargets(s, forceDocument).then(function (targets) {
-    ensureRelaunchButton(figma.root);
-    for (var n = 0; n < targets.length; n++) ensureRelaunchButton(targets[n]);
+    addButtons(forceDocument || s.scope === 'document' ? figma.root.children : [figma.currentPage]);
 
     if (targets.length === 0) {
       return { changed: 0, hidden: 0, total: 0, message: t.empty[scopeKey] };
@@ -351,6 +363,9 @@ function openUI(settings) {
 }
 
 /* -------------------------------------------------------------------- main */
+
+// Finding frames skips hidden layers inside instances, which can be slow in big files.
+figma.skipInvisibleInstanceChildren = true;
 
 loadSettings().then(function (settings) {
   var command = figma.command || 'open';
