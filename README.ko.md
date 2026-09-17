@@ -47,6 +47,10 @@ Manifest error: Expected "manifest.containsWidget" to have type true but got und
 | Show Frame Name Labels | 설정한 범위의 이름을 되돌립니다. |
 | Restore All Frame Names | 범위와 상관없이 모든 페이지의 이름을 되돌립니다. |
 
+### 오른쪽 패널 버튼
+
+파일에서 플러그인이 명령을 한 번 실행하고 나면, 아무것도 선택하지 않았을 때 오른쪽 패널에 **Toggle frame names** 버튼이 생깁니다. 메뉴를 열지 않고 이 버튼으로 이름을 숨기고 되돌릴 수 있습니다. 버튼은 파일에 저장되므로 같은 파일을 여는 사람에게도 보입니다.
+
 ## 설정
 
 - **적용 범위**: 이 페이지 / 모든 페이지 / 선택한 레이어

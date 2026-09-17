@@ -47,6 +47,10 @@ Most of the time, **Open** is all you need: the plugin window has buttons to hid
 | Show Frame Name Labels | Restores names in the current scope. |
 | Restore All Frame Names | Restores names on every page, whatever the scope. |
 
+### Right panel button
+
+After the plugin runs a command in a file, a **Toggle frame names** button appears in the right panel whenever nothing is selected. Click it to hide or show names without opening a menu. The button is saved with the file, so people who open the file see it too.
+
 ## Settings
 
 - **Scope**: this page, all pages, or selected layers

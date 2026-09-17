@@ -7,6 +7,9 @@
   "editorType": ["figma"],
   "documentAccess": "dynamic-page",
   "networkAccess": { "allowedDomains": ["none"] },
+  "relaunchButtons": [
+    { "command": "toggle", "name": "Toggle frame names" }
+  ],
   "menu": [
     { "name": "Open", "command": "open" },
     { "separator": true },

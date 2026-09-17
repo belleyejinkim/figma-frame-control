@@ -37,6 +37,10 @@ function buildDoc() {
   const page1 = node('PAGE', 'Page 1', [a, b, section, group, componentSet, component, instance, parentFrame]);
   const page2 = node('PAGE', 'Page 2', [node('FRAME', 'Z')]);
   const root = node('DOCUMENT', 'Doc', [page1, page2]);
+  root.relaunch = {};
+  root.relaunchWrites = 0;
+  root.getRelaunchData = () => root.relaunch;
+  root.setRelaunchData = data => { root.relaunch = data; root.relaunchWrites++; };
   return {
     root, page1, page2,
     n: { a, b, section, inSection, group, inGroup, componentSet, variant, component, instance, parentFrame, child }
@@ -294,6 +298,30 @@ test('the window cannot reset onboarding or open arbitrary links', async () => {
   assert.strictEqual(store[SETTINGS_KEY].scope, 'document');
   assert.deepStrictEqual(r.opened, ['https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform']);
   assert.deepStrictEqual(r.resized, [[380, 680]]);
+});
+
+test('running a command adds the right panel button once per file', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'toggle', { store });
+  // The object comes from the plugin's own vm context, so compare values, not prototypes.
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(doc.root.relaunch)), { toggle: '' });
+  await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.root.relaunchWrites, 1);
+});
+
+test('opening the window without running a command adds no button', async () => {
+  const doc = buildDoc();
+  await run(doc, 'open');
+  assert.strictEqual(doc.root.relaunchWrites, 0);
+});
+
+test('a file that cannot store the button still runs the command', async () => {
+  const doc = buildDoc();
+  doc.root.setRelaunchData = () => { throw new Error('view-only'); };
+  const r = await run(doc, 'hide');
+  assert.strictEqual(doc.n.a.name, BLANK);
+  assert.match(r.closed, /^Hid /);
 });
 
 (async () => {

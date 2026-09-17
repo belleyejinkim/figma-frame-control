@@ -214,12 +214,25 @@ function countHidden(targets) {
 
 /* ---------------------------------------------------------------- commands */
 
+// Puts a "Toggle frame names" button in the right panel, shown whenever nothing is
+// selected. It is stored in the file once, the first time the plugin runs a command there.
+function ensureRelaunchButton() {
+  try {
+    // The description is an empty string, so check for the key, not its value.
+    if (!('toggle' in figma.root.getRelaunchData())) figma.root.setRelaunchData({ toggle: '' });
+  } catch (err) {
+    // Files you can only view can't store the button. The command still runs.
+  }
+}
+
 function runCommand(command, s) {
   var t = messagesFor(s);
   var forceDocument = command === 'restore-all';
   var scopeKey = forceDocument ? 'document' : (t.scope[s.scope] ? s.scope : 'page');
 
   return collectTargets(s, forceDocument).then(function (targets) {
+    ensureRelaunchButton();
+
     if (targets.length === 0) {
       return { changed: 0, hidden: 0, total: 0, message: t.empty[scopeKey] };
     }
