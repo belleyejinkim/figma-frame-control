@@ -49,7 +49,7 @@ Most of the time, **Open** is all you need: the plugin window has buttons to hid
 
 ### Right panel button
 
-After the plugin runs a command in a file, a **Hide/Show Frame Name** button appears under **Tools** in the right panel. You see it when nothing is selected, and when you select any frame, section, or component on a page where the plugin has run. Frames you add later get it the next time the plugin runs on that page. Layers inside instances can't carry it. Click it to hide or show names without opening a menu. It follows the plugin's scope, so it changes the whole page unless the scope is set to selected layers.
+After the plugin runs a command in a file, a **Hide/Show Frame Name** button appears under **Tools** in the right panel. You see it when nothing is selected, and when you select a frame whose name shows on the canvas, on a page where the plugin has run. Frames you add later get it the next time the plugin runs on that page. Click it to hide or show names without opening a menu. It follows the plugin's scope, so it changes the whole page unless the scope is set to selected layers.
 
 The button is saved with the file, so people who open the file see it too. To remove it from a layer, click **−** next to it. The plugin won't add it back.
 
@@ -69,8 +69,7 @@ This approach has side effects:
 - **Names look blank in the Layers panel too.** The plugin can't hide the canvas label alone.
 - **Collaborators see the change.** Renaming a layer edits the file.
 - **Each run adds one undo step.** ⌘Z brings the names back, and version history is a safe fallback.
-- **Instances and nested frames keep their names.** Renaming an instance would unlink it from its main component's name, and frames nested inside other frames don't show labels on the canvas.
-- **Variant components are never renamed.** Their `Property=Value` names define the variants.
+- **Only frames whose names show on the canvas change.** Figma shows names only for [top-level frames](https://help.figma.com/hc/en-us/articles/360041539473-Frames-in-Figma-Design), which sit directly on the canvas, and frames placed in a section show theirs too. Frames inside other frames or groups, sections, components, variants, and instances keep their names. Renaming a component would also change the names its instances show, so components are left alone.
 
 If you rename a layer while its name is hidden, the plugin keeps your new name when it restores the others.
 

@@ -19,7 +19,7 @@ Paste everything between the lines. The English part comes first, then Korean.
 
 ---
 
-Hide the name labels above frames and sections to see a clean canvas. Click again to bring them back. Nothing to set up.
+Hide the name labels above frames to see a clean canvas. Click again to bring them back. Nothing to set up.
 
 HIGHLIGHTS
 • Free
@@ -38,7 +38,7 @@ Figma's plugin API can't switch off canvas labels. The plugin renames each frame
 • Names look blank in the Layers panel too
 • Collaborators see the change
 • ⌘Z brings names back, and version history is a safe fallback
-• Instances, variants, and frames nested inside other frames keep their names
+• Only frames whose names show on the canvas change. Sections, components, and frames inside other frames or groups keep their names
 
 Feedback: https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform
 Made by Belle Kim · https://www.linkedin.com/in/belleyejinkim/
@@ -46,7 +46,7 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 
 ―――――
 
-캔버스의 프레임·섹션 이름 라벨을 숨겨 화면을 깔끔하게 보고, 다시 한 번 눌러 켭니다. 따로 설정할 것은 없습니다.
+캔버스의 프레임 이름 라벨을 숨겨 화면을 깔끔하게 보고, 다시 한 번 눌러 켭니다. 따로 설정할 것은 없습니다.
 
 특징
 • 무료입니다
@@ -65,7 +65,7 @@ Figma 플러그인 API로는 캔버스 라벨을 끌 수 없습니다. 그래서
 • 레이어 패널에서도 이름이 비어 보입니다
 • 같은 파일을 보는 동료에게도 보입니다
 • ⌘Z나 버전 기록으로 되돌릴 수 있습니다
-• 인스턴스, 배리언트, 다른 프레임 안의 프레임은 이름을 바꾸지 않습니다
+• 캔버스에 이름이 보이는 프레임만 바꾸고, 섹션·컴포넌트·다른 프레임이나 그룹 안의 프레임은 그대로 둡니다
 
 피드백: https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform
 만든 사람: Belle Kim · https://www.linkedin.com/in/belleyejinkim/

@@ -8,7 +8,7 @@
  * or the file has been closed.
  */
 
-var BLANK = '⠀';
+var BLANK = '\u2800';
 var KEY_ORIGINAL = 'fnc_original';
 var KEY_HIDDEN = 'fnc_hidden';
 var KEY_BUTTON = 'fnc_button';
@@ -123,25 +123,12 @@ function saveSettings(settings) {
 
 /* ----------------------------------------------------------------- targets */
 
+// Figma shows frame names on the canvas only for top-level frames, which sit directly on
+// the canvas. Frames placed in a section still show theirs. Frames inside other frames or
+// groups, sections, components, and instances don't get renamed.
 function isTarget(node) {
-  switch (node.type) {
-    case 'FRAME':
-    case 'SECTION':
-    case 'COMPONENT_SET':
-      return true;
-    case 'COMPONENT':
-      // Variant names follow "Property=Value". Renaming one breaks the variant.
-      return !(node.parent && node.parent.type === 'COMPONENT_SET');
-    default:
-      // Instances keep the name that follows their main component.
-      return false;
-  }
-}
-
-// Frames inside sections and groups still show labels on the canvas.
-// Frames nested inside other frames don't, so they keep their names.
-function showsNestedLabels(node) {
-  return node.type === 'SECTION' || node.type === 'GROUP';
+  if (node.type !== 'FRAME' || !node.parent) return false;
+  return node.parent.type === 'PAGE' || node.parent.type === 'SECTION';
 }
 
 function walk(container, out) {
@@ -149,39 +136,58 @@ function walk(container, out) {
   for (var i = 0; i < kids.length; i++) {
     var node = kids[i];
     if (isTarget(node)) out.push(node);
-    if (showsNestedLabels(node)) walk(node, out);
+    else if (node.type === 'SECTION') walk(node, out);
   }
+}
+
+function pagesFor(s, forceDocument) {
+  if (forceDocument || s.scope === 'document') {
+    return figma.loadAllPagesAsync().then(function () { return figma.root.children; });
+  }
+  return Promise.resolve([figma.currentPage]);
 }
 
 function collectTargets(s, forceDocument) {
   var out = [];
+  var seen = {};
+  function add(node) {
+    if (seen[node.id]) return;
+    seen[node.id] = true;
+    out.push(node);
+  }
 
   if (!forceDocument && s.scope === 'selection') {
     var sel = figma.currentPage.selection;
     for (var i = 0; i < sel.length; i++) {
       var node = sel[i];
-      if (isTarget(node)) out.push(node);
-      if (showsNestedLabels(node)) walk(node, out);
+      if (isTarget(node) || isHidden(node)) add(node);
+      if (node.type === 'SECTION') {
+        var inside = [];
+        walk(node, inside);
+        for (var j = 0; j < inside.length; j++) add(inside[j]);
+      }
     }
     return Promise.resolve(out);
   }
 
-  if (forceDocument || s.scope === 'document') {
-    return figma.loadAllPagesAsync().then(function () {
-      var pages = figma.root.children;
-      for (var p = 0; p < pages.length; p++) walk(pages[p], out);
-      return out;
-    });
-  }
-
-  walk(figma.currentPage, out);
-  return Promise.resolve(out);
+  return pagesFor(s, forceDocument).then(function (pages) {
+    for (var p = 0; p < pages.length; p++) {
+      var found = [];
+      walk(pages[p], found);
+      for (var f = 0; f < found.length; f++) add(found[f]);
+      // Earlier versions also hid sections, components, and frames in groups. Keep finding
+      // names hidden that way so they can still be restored.
+      var hidden = pages[p].findAllWithCriteria({ pluginData: { keys: [KEY_HIDDEN] } });
+      for (var h = 0; h < hidden.length; h++) if (isHidden(hidden[h])) add(hidden[h]);
+    }
+    return out;
+  });
 }
 
 /* ------------------------------------------------------------- hide / show */
 
 function isBlankName(name) {
-  return name.replace(/[⠀ㅤ​ \s]/g, '') === '';
+  return name.replace(/[\u2800\u3164\u200b\u00a0\s]/g, '') === '';
 }
 
 function isHidden(node) {
@@ -217,16 +223,27 @@ function countHidden(targets) {
 
 // Puts a "Hide/Show Frame Name" button under Tools in the right panel. Figma shows it when
 // nothing is selected (data on the document) and when every selected layer carries the data
-// itself, so it also goes on each frame, section, and component on the pages the command covers.
-var BUTTON_TYPES = ['FRAME', 'SECTION', 'COMPONENT', 'COMPONENT_SET'];
-
-function addButtons(pages) {
+// itself, so it also goes on each frame the plugin renames.
+function addButtons(targets) {
   ensureRelaunchButton(figma.root);
+  for (var i = 0; i < targets.length; i++) {
+    if (isTarget(targets[i])) ensureRelaunchButton(targets[i]);
+  }
+}
+
+// An earlier version put the button on every frame, section, and component. Take it off
+// the layers that aren't renamed anymore.
+function removeOldButtons(pages) {
   for (var p = 0; p < pages.length; p++) {
-    var nodes = pages[p].findAllWithCriteria({ types: BUTTON_TYPES });
+    var nodes = pages[p].findAllWithCriteria({ pluginData: { keys: [KEY_BUTTON] } });
     for (var i = 0; i < nodes.length; i++) {
-      // Layers inside instances have ids starting with "I" and can't be changed.
-      if (nodes[i].id.charAt(0) !== 'I') ensureRelaunchButton(nodes[i]);
+      if (isTarget(nodes[i])) continue;
+      try {
+        nodes[i].setRelaunchData({});
+        nodes[i].setPluginData(KEY_BUTTON, '');
+      } catch (err) {
+        // Layers that can't be changed keep it.
+      }
     }
   }
 }
@@ -248,7 +265,8 @@ function runCommand(command, s) {
   var scopeKey = forceDocument ? 'document' : (t.scope[s.scope] ? s.scope : 'page');
 
   return collectTargets(s, forceDocument).then(function (targets) {
-    addButtons(forceDocument || s.scope === 'document' ? figma.root.children : [figma.currentPage]);
+    removeOldButtons(forceDocument || s.scope === 'document' ? figma.root.children : [figma.currentPage]);
+    addButtons(targets);
 
     if (targets.length === 0) {
       return { changed: 0, hidden: 0, total: 0, message: t.empty[scopeKey] };
@@ -363,9 +381,6 @@ function openUI(settings) {
 }
 
 /* -------------------------------------------------------------------- main */
-
-// Finding frames skips hidden layers inside instances, which can be slow in big files.
-figma.skipInvisibleInstanceChildren = true;
 
 loadSettings().then(function (settings) {
   var command = figma.command || 'open';

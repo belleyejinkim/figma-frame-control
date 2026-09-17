@@ -9,6 +9,7 @@ const assert = require('assert');
 const SRC = fs.readFileSync(path.join(__dirname, '..', 'code.js'), 'utf8');
 const BLANK = '⠀';
 const SETTINGS_KEY = 'frame-name-control/settings';
+const FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform';
 
 let nextId = 1;
 
@@ -22,10 +23,12 @@ function node(type, name, children, id) {
     n.children = children;
     children.forEach(child => { child.parent = n; });
   }
-  n.findAllWithCriteria = ({ types }) => {
+  n.findAllWithCriteria = ({ types, pluginData }) => {
     const out = [];
     const visit = parent => (parent.children || []).forEach(child => {
-      if (types.includes(child.type)) out.push(child);
+      const typeOk = !types || types.includes(child.type);
+      const dataOk = !pluginData || pluginData.keys.some(key => child.pluginData[key]);
+      if (typeOk && dataOk) out.push(child);
       visit(child);
     });
     visit(n);
@@ -34,11 +37,12 @@ function node(type, name, children, id) {
   return n;
 }
 
+// Page 1 holds every kind of layer the plugin has to tell apart.
 function buildDoc() {
-  const child = node('FRAME', 'Child');
-  const parentFrame = node('FRAME', 'Parent', [child]);
+  const inNestedSection = node('FRAME', 'InNestedSection');
+  const nestedSection = node('SECTION', 'Nested Section', [inNestedSection]);
   const inSection = node('FRAME', 'InSection');
-  const section = node('SECTION', 'Section S', [inSection]);
+  const section = node('SECTION', 'Section S', [inSection, nestedSection]);
   const inGroup = node('FRAME', 'InGroup');
   const group = node('GROUP', 'Group G', [inGroup]);
   const variant = node('COMPONENT', 'Size=Large');
@@ -46,6 +50,8 @@ function buildDoc() {
   const component = node('COMPONENT', 'Icon');
   const insideInstance = node('FRAME', 'Inside Instance', null, 'I1:99;2:1');
   const instance = node('INSTANCE', 'Button Instance', [insideInstance]);
+  const child = node('FRAME', 'Child');
+  const parentFrame = node('FRAME', 'Parent', [child]);
   const a = node('FRAME', 'A');
   const b = node('FRAME', 'B');
   const page1 = node('PAGE', 'Page 1', [a, b, section, group, componentSet, component, instance, parentFrame]);
@@ -53,7 +59,8 @@ function buildDoc() {
   const root = node('DOCUMENT', 'Doc', [page1, page2]);
   return {
     root, page1, page2,
-    n: { a, b, section, inSection, group, inGroup, componentSet, variant, component, instance, insideInstance, parentFrame, child }
+    n: { a, b, section, inSection, nestedSection, inNestedSection, group, inGroup, componentSet, variant,
+         component, instance, insideInstance, parentFrame, child }
   };
 }
 
@@ -108,47 +115,55 @@ function run(doc, command, opts = {}) {
   });
 }
 
+// Objects made inside the plugin's vm context have their own prototypes; compare plain values.
+const plain = value => JSON.parse(JSON.stringify(value));
+
 const tests = [];
 const test = (name, fn) => tests.push({ name, fn });
 
-test('toggle hides top-level frames and keeps the original name', async () => {
+/* ------------------------------------------------------------------ which layers */
+
+test('top-level frames are hidden and keep their original names', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
   assert.strictEqual(doc.n.a.name, BLANK);
+  assert.strictEqual(doc.n.b.name, BLANK);
   assert.strictEqual(doc.n.a.getPluginData('fnc_original'), 'A');
 });
 
-test('sections, and frames inside sections and groups, are hidden', async () => {
+test('frames placed in a section, including a section inside a section, are hidden', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
-  assert.strictEqual(doc.n.section.name, BLANK);
   assert.strictEqual(doc.n.inSection.name, BLANK);
-  assert.strictEqual(doc.n.inGroup.name, BLANK);
+  assert.strictEqual(doc.n.inNestedSection.name, BLANK);
 });
 
-test('components and component sets are hidden, variants never', async () => {
+test('sections, components, variants, and instances keep their names', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
-  assert.strictEqual(doc.n.component.name, BLANK);
-  assert.strictEqual(doc.n.componentSet.name, BLANK);
+  assert.strictEqual(doc.n.section.name, 'Section S');
+  assert.strictEqual(doc.n.nestedSection.name, 'Nested Section');
+  assert.strictEqual(doc.n.component.name, 'Icon');
+  assert.strictEqual(doc.n.componentSet.name, 'Button');
   assert.strictEqual(doc.n.variant.name, 'Size=Large');
+  assert.strictEqual(doc.n.instance.name, 'Button Instance');
 });
 
-test('instances, nested frames, and other pages keep their names', async () => {
+test('frames inside other frames, groups, or instances keep their names', async () => {
   const doc = buildDoc();
   await run(doc, 'toggle');
-  assert.strictEqual(doc.n.instance.name, 'Button Instance');
   assert.strictEqual(doc.n.child.name, 'Child');
+  assert.strictEqual(doc.n.inGroup.name, 'InGroup');
+  assert.strictEqual(doc.n.insideInstance.name, 'Inside Instance');
+});
+
+test('other pages are untouched unless the scope covers them', async () => {
+  const doc = buildDoc();
+  await run(doc, 'toggle');
   assert.strictEqual(doc.page2.children[0].name, 'Z');
 });
 
-test('old target options saved by earlier versions are ignored', async () => {
-  const doc = buildDoc();
-  await run(doc, 'hide', { settings: { includeInstances: true, includeNested: true, includeSections: false } });
-  assert.strictEqual(doc.n.instance.name, 'Button Instance');
-  assert.strictEqual(doc.n.child.name, 'Child');
-  assert.strictEqual(doc.n.section.name, BLANK);
-});
+/* --------------------------------------------------------------- hide and restore */
 
 test('a second toggle restores names and clears plugin data', async () => {
   const doc = buildDoc();
@@ -158,6 +173,30 @@ test('a second toggle restores names and clears plugin data', async () => {
   assert.strictEqual(doc.n.a.name, 'A');
   assert.strictEqual(doc.n.inSection.name, 'InSection');
   assert.strictEqual(doc.n.a.getPluginData('fnc_hidden'), '');
+});
+
+test('names hidden by an earlier version are still restored', async () => {
+  const doc = buildDoc();
+  // Earlier versions also renamed sections, components, and frames in groups.
+  for (const key of ['section', 'component', 'inGroup']) {
+    const layer = doc.n[key];
+    layer.setPluginData('fnc_original', layer.name);
+    layer.setPluginData('fnc_hidden', '1');
+    layer.name = BLANK;
+  }
+  await run(doc, 'toggle');   // something is hidden, so toggle restores
+  assert.strictEqual(doc.n.section.name, 'Section S');
+  assert.strictEqual(doc.n.component.name, 'Icon');
+  assert.strictEqual(doc.n.inGroup.name, 'InGroup');
+});
+
+test('old target options saved by earlier versions are ignored', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { includeInstances: true, includeNested: true, includeSections: true, includeComponents: true } });
+  assert.strictEqual(doc.n.instance.name, 'Button Instance');
+  assert.strictEqual(doc.n.child.name, 'Child');
+  assert.strictEqual(doc.n.section.name, 'Section S');
+  assert.strictEqual(doc.n.component.name, 'Icon');
 });
 
 test('document scope reaches other pages, restore-all ignores scope', async () => {
@@ -185,26 +224,99 @@ test('hiding twice does not overwrite the original name', async () => {
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('selection scope touches only the selection', async () => {
+/* ------------------------------------------------------------------ selection scope */
+
+test('selection scope touches only selected top-level frames', async () => {
   const doc = buildDoc();
   await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.b] });
   assert.strictEqual(doc.n.b.name, BLANK);
   assert.strictEqual(doc.n.a.name, 'A');
 });
 
-test('selecting a frame leaves the frames nested inside it alone', async () => {
-  const doc = buildDoc();
-  await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.parentFrame] });
-  assert.strictEqual(doc.n.parentFrame.name, BLANK);
-  assert.strictEqual(doc.n.child.name, 'Child');
-});
-
-test('selecting a section hides the frames inside it', async () => {
+test('selecting a section hides the frames placed in it', async () => {
   const doc = buildDoc();
   await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.section] });
-  assert.strictEqual(doc.n.section.name, BLANK);
+  assert.strictEqual(doc.n.section.name, 'Section S');
   assert.strictEqual(doc.n.inSection.name, BLANK);
+  assert.strictEqual(doc.n.inNestedSection.name, BLANK);
 });
+
+test('selecting a nested frame or a group changes nothing', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { scope: 'selection' }, selection: [doc.n.child, doc.n.group] });
+  assert.strictEqual(doc.n.child.name, 'Child');
+  assert.strictEqual(doc.n.inGroup.name, 'InGroup');
+  assert.strictEqual(doc.n.group.name, 'Group G');
+});
+
+/* --------------------------------------------------------- right panel button */
+
+test('the button goes on the document and on renamed frames, once', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'toggle', { store });
+  assert.deepStrictEqual(plain(doc.root.relaunch), { toggle: '' });
+  for (const key of ['a', 'b', 'parentFrame', 'inSection', 'inNestedSection']) {
+    assert.deepStrictEqual(plain(doc.n[key].relaunch), { toggle: '' }, key + ' should carry the button');
+  }
+  for (const key of ['section', 'nestedSection', 'component', 'componentSet', 'variant', 'instance',
+                     'insideInstance', 'child', 'group', 'inGroup']) {
+    assert.strictEqual(doc.n[key].relaunchWrites, 0, key + ' should not carry the button');
+  }
+  await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.root.relaunchWrites, 1);
+  assert.strictEqual(doc.n.a.relaunchWrites, 1);
+  assert.ok('toggle' in doc.n.a.relaunch, 'restoring names keeps the button');
+});
+
+test('buttons an earlier version put on other layers are taken off', async () => {
+  const doc = buildDoc();
+  for (const key of ['child', 'section', 'component', 'a']) {
+    doc.n[key].setRelaunchData({ toggle: '' });
+    doc.n[key].setPluginData('fnc_button', '1');
+  }
+  await run(doc, 'toggle');
+  for (const key of ['child', 'section', 'component']) {
+    assert.deepStrictEqual(plain(doc.n[key].relaunch), {}, key + ' should lose the old button');
+    assert.strictEqual(doc.n[key].getPluginData('fnc_button'), '');
+  }
+  assert.deepStrictEqual(plain(doc.n.a.relaunch), { toggle: '' }, 'top-level frames keep theirs');
+});
+
+test('a button someone removed from a frame is not added back', async () => {
+  const doc = buildDoc();
+  const store = {};
+  await run(doc, 'toggle', { store });
+  doc.n.a.relaunch = {};          // the "−" next to the button in the right panel
+  doc.root.relaunch = {};
+  await run(doc, 'toggle', { store });
+  assert.strictEqual(doc.n.a.relaunchWrites, 1);
+  assert.strictEqual('toggle' in doc.n.a.relaunch, false);
+  assert.strictEqual(doc.root.relaunchWrites, 1);
+});
+
+test('all-pages scope adds the button on every page', async () => {
+  const doc = buildDoc();
+  await run(doc, 'hide', { settings: { scope: 'document' } });
+  assert.ok('toggle' in doc.page2.children[0].relaunch);
+});
+
+test('opening the window without running a command adds no button', async () => {
+  const doc = buildDoc();
+  await run(doc, 'open');
+  assert.strictEqual(doc.root.relaunchWrites, 0);
+  assert.strictEqual(doc.n.a.relaunchWrites, 0);
+});
+
+test('a file that cannot store the button still runs the command', async () => {
+  const doc = buildDoc();
+  doc.root.setRelaunchData = () => { throw new Error('view-only'); };
+  const r = await run(doc, 'hide');
+  assert.strictEqual(doc.n.a.name, BLANK);
+  assert.match(r.closed, /^Hid /);
+});
+
+/* ------------------------------------------------------------ window and language */
 
 test('Open opens the window and sends state after ready', async () => {
   const doc = buildDoc();
@@ -212,9 +324,15 @@ test('Open opens the window and sends state after ready', async () => {
   const state = r.uiMessages.find(m => m.type === 'state');
   assert.ok(r.shownUI[0].visible !== false);
   assert.strictEqual(state.language, 'ko');
-  assert.ok(state.status.total > 0);
-  assert.strictEqual('view' in state, false);
+  assert.strictEqual(state.status.total, 5);   // a, b, inSection, inNestedSection, parentFrame
   assert.strictEqual(r.store[SETTINGS_KEY].detectedLanguage, 'ko');
+});
+
+test('the old Settings command still opens the window', async () => {
+  const doc = buildDoc();
+  const r = await run(doc, 'settings');
+  assert.ok(r.uiMessages.some(m => m.type === 'state'));
+  assert.strictEqual(doc.n.a.name, 'A');
 });
 
 test('a headless run detects the language once and remembers it', async () => {
@@ -223,17 +341,17 @@ test('a headless run detects the language once and remembers it', async () => {
   const first = await run(doc, 'toggle', { store, language: 'ko-KR' });
   assert.strictEqual(first.shownUI.length, 1);
   assert.strictEqual(first.shownUI[0].visible, false);
-  assert.match(first.closed, /^숨김 \d+개 · 이 페이지$/);
+  assert.match(first.closed, /^숨김 5개 · 이 페이지$/);
 
   const second = await run(doc, 'toggle', { store, language: 'en-US' });
   assert.strictEqual(second.shownUI.length, 0);
-  assert.match(second.closed, /^복구 \d+개 · 이 페이지$/);
+  assert.match(second.closed, /^복구 5개 · 이 페이지$/);
 });
 
 test('English is used for non-Korean environments', async () => {
   const doc = buildDoc();
   const r = await run(doc, 'toggle', { language: 'en-KR' });
-  assert.match(r.closed, /^Hid \d+ names · This page$/);
+  assert.match(r.closed, /^Hid 5 names · This page$/);
 });
 
 test('a language override skips detection', async () => {
@@ -284,13 +402,6 @@ test('closing the window without running keeps it for the next command', async (
   assert.strictEqual(store[SETTINGS_KEY].onboarded, false);
 });
 
-test('the old Settings command still opens the window', async () => {
-  const doc = buildDoc();
-  const r = await run(doc, 'settings');
-  assert.ok(r.uiMessages.some(m => m.type === 'state'));
-  assert.strictEqual(doc.n.a.name, 'A');
-});
-
 test('the window cannot reset onboarding or open arbitrary links', async () => {
   const doc = buildDoc();
   const store = {};
@@ -306,68 +417,8 @@ test('the window cannot reset onboarding or open arbitrary links', async () => {
   });
   assert.strictEqual(store[SETTINGS_KEY].onboarded, true);
   assert.strictEqual(store[SETTINGS_KEY].scope, 'document');
-  assert.deepStrictEqual(r.opened, ['https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform']);
+  assert.deepStrictEqual(r.opened, [FORM]);
   assert.deepStrictEqual(r.resized, [[380, 680]]);
-});
-
-test('running a command adds the right panel button once per file', async () => {
-  const doc = buildDoc();
-  const store = {};
-  await run(doc, 'toggle', { store });
-  // The object comes from the plugin's own vm context, so compare values, not prototypes.
-  assert.deepStrictEqual(JSON.parse(JSON.stringify(doc.root.relaunch)), { toggle: '' });
-  await run(doc, 'toggle', { store });
-  assert.strictEqual(doc.root.relaunchWrites, 1);
-});
-
-test('every frame on the page gets the button, including nested frames', async () => {
-  const doc = buildDoc();
-  const store = {};
-  await run(doc, 'toggle', { store });
-  for (const key of ['a', 'section', 'inSection', 'inGroup', 'parentFrame', 'child', 'component', 'componentSet', 'variant']) {
-    assert.ok('toggle' in doc.n[key].relaunch, key + ' should carry the button');
-  }
-  for (const key of ['instance', 'insideInstance', 'group']) {
-    assert.strictEqual(doc.n[key].relaunchWrites, 0, key + ' should not carry the button');
-  }
-  assert.strictEqual(doc.n.child.name, 'Child', 'nested frames still keep their names');
-  assert.strictEqual(doc.page2.children[0].relaunchWrites, 0, 'other pages wait until the plugin runs there');
-
-  await run(doc, 'toggle', { store });
-  assert.strictEqual(doc.n.a.relaunchWrites, 1);
-  assert.ok('toggle' in doc.n.a.relaunch, 'restoring names keeps the button');
-});
-
-test('all-pages scope adds the button on every page', async () => {
-  const doc = buildDoc();
-  await run(doc, 'hide', { settings: { scope: 'document' } });
-  assert.ok('toggle' in doc.page2.children[0].relaunch);
-});
-
-test('a button someone removed from a layer is not added back', async () => {
-  const doc = buildDoc();
-  const store = {};
-  await run(doc, 'toggle', { store });
-  doc.n.a.relaunch = {};          // the "−" next to the button in the right panel
-  doc.root.relaunch = {};
-  await run(doc, 'toggle', { store });
-  assert.strictEqual(doc.n.a.relaunchWrites, 1);
-  assert.strictEqual('toggle' in doc.n.a.relaunch, false);
-  assert.strictEqual(doc.root.relaunchWrites, 1);
-});
-
-test('opening the window without running a command adds no button', async () => {
-  const doc = buildDoc();
-  await run(doc, 'open');
-  assert.strictEqual(doc.root.relaunchWrites, 0);
-});
-
-test('a file that cannot store the button still runs the command', async () => {
-  const doc = buildDoc();
-  doc.root.setRelaunchData = () => { throw new Error('view-only'); };
-  const r = await run(doc, 'hide');
-  assert.strictEqual(doc.n.a.name, BLANK);
-  assert.match(r.closed, /^Hid /);
 });
 
 (async () => {
