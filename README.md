@@ -53,6 +53,18 @@ After the plugin runs a command in a file, a **Hide/Show Frame Name** button app
 
 The button is saved with the file, so people who open the file see it too. To remove it from a layer, click **−** next to it. The plugin won't add it back.
 
+### Keyboard shortcut (macOS, optional)
+
+Figma can't give plugins a shortcut, but macOS can bind one to any menu item. It takes a minute, once per computer.
+
+1. Open **System Settings → Keyboard**, then click **Keyboard Shortcuts…**
+2. Pick **App Shortcuts** on the left, then click **+**.
+3. Choose **Figma**, and enter `Toggle Frame Names` as the menu title. It has to match exactly, so copy it from the plugin window.
+4. Click the shortcut field, press **⌥⌘F**, then click **Done**.
+5. Quit Figma with **⌘Q** and open it again.
+
+Now **⌥⌘F** hides and shows frame names from anywhere in Figma. Any combination works as long as it includes **⌘** and Figma doesn't already use it; ⌘F and ⇧⌘F are taken. On Windows, use the button in the right panel.
+
 ## Settings
 
 - **Scope**: this page, all pages, or selected layers

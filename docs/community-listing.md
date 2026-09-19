@@ -27,6 +27,14 @@ HIGHLIGHTS
 • Explains what it changes the first time you run it
 • Adds a Hide/Show Frame Name button under Tools in the right panel after the first use
 
+KEYBOARD SHORTCUT (macOS, optional)
+Figma can't give plugins a shortcut, but macOS can bind one to a menu item. One minute, once per computer:
+1. Open System Settings → Keyboard → Keyboard Shortcuts… → App Shortcuts
+2. Click +, choose Figma, and enter the menu title: Toggle Frame Names
+3. Click the shortcut field, press ⌥⌘F, then click Done
+4. Quit Figma with ⌘Q and open it again
+On Windows, use the button in the right panel.
+
 COMMANDS
 • Open: opens the plugin window with buttons to hide and restore names, plus the scope and language
 • Toggle Frame Names: hides names, or restores them if they're hidden
@@ -53,6 +61,14 @@ Source code: https://github.com/belleyejinkim/figma-frame-control
 • 파일을 닫았다 열어도 원래 이름을 정확히 되돌립니다
 • 처음 실행할 때 무엇을 바꾸는지 안내합니다
 • 한 번 쓰고 나면 오른쪽 패널 Tools에 Hide/Show Frame Name 버튼이 생깁니다
+
+단축키 (macOS, 선택)
+Figma는 플러그인에 단축키를 줄 수 없지만, macOS는 메뉴 항목에 단축키를 붙일 수 있습니다. 컴퓨터마다 한 번, 1분이면 됩니다.
+1. 시스템 설정 → 키보드 → 키보드 단축키… → 앱 단축키를 엽니다
+2. + 버튼을 누르고 Figma를 고른 뒤, 메뉴 제목에 Toggle Frame Names를 입력합니다
+3. 키보드 단축키 칸을 누르고 ⌥⌘F를 누른 다음 완료를 누릅니다
+4. Figma를 ⌘Q로 종료했다가 다시 엽니다
+Windows에서는 오른쪽 패널 버튼을 쓰세요.
 
 명령
 • Open: 이름을 숨기고 되돌리는 버튼과 적용 범위, 언어가 있는 플러그인 창을 엽니다
