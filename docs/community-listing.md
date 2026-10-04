@@ -5,7 +5,7 @@ Copy these fields into the publish form (**Plugins → Manage plugins → Frame 
 | Field | Value |
 | --- | --- |
 | Name | Frame Name Control |
-| Tagline | Hide frame name labels on the canvas with one click |
+| Tagline | Hide frame name labels on the canvas with one click or a shortcut |
 | Category | Design tools |
 | Icon | `assets/icon.png` (128 × 128) |
 | Thumbnail | `assets/cover.mp4` (video, 1920 × 1080). If the form rejects it, use `assets/cover.png`. |

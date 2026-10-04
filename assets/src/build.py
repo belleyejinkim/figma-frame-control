@@ -17,18 +17,19 @@ SRC = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.dirname(SRC)
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-# (query, milliseconds). One loop: click to hide, then click to restore.
+# (query, milliseconds). One loop: click the button to hide, press ⌥⌘F to bring names back.
 TIMELINE = [
-    ("labels=1", 1400),
-    ("labels=1&pressed=1", 140),
-    ("labels=0.4&pressed=1", 70),
-    ("labels=0&names=hidden&toast=hid", 1700),
-    ("labels=0&names=hidden", 600),
-    ("labels=0&names=hidden&pressed=1", 140),
-    ("labels=0.6&names=hidden&pressed=1", 70),
-    ("labels=1&toast=restored", 1700),
+    ("labels=1&cursor=1", 1200),
+    ("labels=1&cursor=1&pressed=1", 140),
+    ("labels=0.4&cursor=1&pressed=1", 70),
+    ("labels=0&names=hidden&toast=hid&cursor=1", 1400),
+    ("labels=0&names=hidden&keys=cmd", 160),
+    ("labels=0&names=hidden&keys=cmd,opt", 160),
+    ("labels=0.6&names=hidden&keys=cmd,opt,f", 70),
+    ("labels=1&toast=restored&keys=cmd,opt,f", 300),
+    ("labels=1&toast=restored", 1300),
 ]
-STATIC_COVER = "labels=0&names=hidden&ghost=1&toast=hid"
+STATIC_COVER = "labels=0&names=hidden&ghost=1&toast=hid&cursor=1"
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -73,7 +74,7 @@ def main():
 
         # GIF: one shared palette so flat areas don't flicker between frames.
         sheet = Image.new("RGB", (1920, 1080 * 3))
-        for row, idx in enumerate((0, 3, 1)):
+        for row, idx in enumerate((0, 3, 7)):
             sheet.paste(frames[idx], (0, 1080 * row))
         palette = sheet.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
         indexed = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]

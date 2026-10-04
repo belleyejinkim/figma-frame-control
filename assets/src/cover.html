@@ -6,6 +6,8 @@
     labels=0..1        opacity of the frame name labels
     names=hidden       the plugin window shows names as hidden
     pressed=1          the button is being clicked
+    cursor=1           the pointer sits on the button
+    keys=cmd,opt,f     keys held down on the keyboard
     toast=hid|restored Figma toast at the bottom of the canvas
     ghost=1            dashed outlines where hidden labels were (static cover only)
   Build everything with: python3 assets/src/build.py
@@ -28,27 +30,42 @@
   /* The Figma mark is used as-is and stays smaller than the plugin name, per Figma's brand guidelines. */
   .eyebrow svg { flex: none; width: 21px; height: 31.5px; margin: 0 26px 0 10px; }
   h1 { font-size: 118px; line-height: 1.02; font-weight: 800; letter-spacing: -0.035em; margin: 0 0 36px; }
-  .tagline { font-size: 40px; line-height: 1.35; color: #B6BBC4; margin: 0 0 56px; font-weight: 500; }
+  .tagline { font-size: 40px; line-height: 1.35; color: #B6BBC4; margin: 0 0 44px; font-weight: 500; }
 
   .window {
-    position: relative; width: 460px; border-radius: 18px; background: #FFFFFF; color: #1E1E1E;
+    position: relative; width: 440px; border-radius: 18px; background: #FFFFFF; color: #1E1E1E;
     font-family: "Inter", -apple-system, sans-serif;
   }
   .window-bar {
-    display: flex; justify-content: space-between; align-items: center; height: 64px; padding: 0 26px;
+    display: flex; justify-content: space-between; align-items: center; height: 58px; padding: 0 24px;
     border-bottom: 1px solid #E6E6E6; font-size: 22px; font-weight: 600;
   }
   .window-bar .close { font-size: 30px; font-weight: 400; color: #8A8A8A; }
-  .window-body { padding: 26px; display: flex; flex-direction: column; gap: 20px; }
-  .window-stat { margin: 0; font-size: 46px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
+  .window-body { padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; }
+  .window-stat { margin: 0; font-size: 42px; font-weight: 600; letter-spacing: -0.02em; line-height: 1; }
   .window-stat span { font-size: 22px; font-weight: 500; color: #7A7A7A; letter-spacing: 0; }
   .window-button {
-    height: 72px; border-radius: 12px; background: #0D99FF; color: #FFFFFF;
-    display: flex; align-items: center; justify-content: center; font-size: 25px; font-weight: 600;
+    height: 64px; border-radius: 12px; background: #0D99FF; color: #FFFFFF;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 600;
   }
+
+  /* The window and the keyboard sit side by side: two ways to do the same thing. */
+  .actions { display: flex; align-items: center; gap: 24px; }
+  .keys { display: flex; gap: 12px; height: 96px; }
+  .key {
+    width: 88px; height: 88px; border-radius: 20px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, "SF Pro Display", sans-serif; font-size: 40px; font-weight: 600;
+    background: #F4F4F2; color: #1A1C21;
+    box-shadow: 0 8px 0 #B9BCC2;
+  }
+  .key.accent { background: #0D99FF; color: #FFFFFF; box-shadow: 0 8px 0 #0870C0; }
+  .key.down { transform: translateY(6px); box-shadow: 0 2px 0 #B9BCC2; background: #E4E4E1; }
+  .key.accent.down { box-shadow: 0 2px 0 #0870C0; background: #0A88E6; }
   body.pressed .window-button { background: #0A7ED6; transform: scale(0.985); }
-  .cursor { position: absolute; left: 364px; top: 214px; width: 44px; height: 56px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)); }
+  .cursor { position: absolute; left: 346px; top: 196px; width: 44px; height: 56px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.3)); }
   body.pressed .cursor { transform: scale(0.88); transform-origin: 6px 4px; }
+  body:not(.has-cursor) .cursor { display: none; }
 
   .canvas {
     position: absolute; left: 990px; top: 130px; width: 800px; height: 820px;
@@ -98,7 +115,8 @@
     <span>Plugin for Figma</span>
   </p>
   <h1>Frame Name<br>Control</h1>
-  <p class="tagline">Hide frame name labels on the canvas with one click.</p>
+  <p class="tagline">Hide frame name labels on the canvas with one click, or your own shortcut.</p>
+  <div class="actions">
   <div class="window">
     <div class="window-bar"><span>Frame Name Control</span><span class="close">×</span></div>
     <div class="window-body">
@@ -108,6 +126,12 @@
     <svg class="cursor" viewBox="0 0 22 28" aria-hidden="true">
       <path d="M2 1.5v21.2l5.2-5 3.4 8 3.3-1.4-3.3-7.8h7.2z" fill="#111111" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
     </svg>
+  </div>
+  <div class="keys">
+    <div class="key" data-key="cmd">⌘</div>
+    <div class="key" data-key="opt">⌥</div>
+    <div class="key accent" data-key="f">F</div>
+  </div>
   </div>
 </div>
 
@@ -137,6 +161,12 @@
 
 <script>
   var q = new URLSearchParams(location.search);
+  var held = (q.get('keys') || '').split(',');
+  document.querySelectorAll('.key').forEach(function (key) {
+    key.classList.toggle('down', held.indexOf(key.dataset.key) !== -1);
+  });
+  document.body.classList.toggle('has-cursor', q.get('cursor') === '1');
+
   var hidden = q.get('names') === 'hidden';
   document.getElementById('stat').textContent = hidden ? '2' : '0';
   document.getElementById('button').textContent = hidden ? 'Show frame names' : 'Hide frame names';
