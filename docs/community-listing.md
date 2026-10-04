@@ -9,7 +9,7 @@ Copy these fields into the publish form (**Plugins → Manage plugins → Frame 
 | Category | Design tools |
 | Icon | `assets/icon.png` (128 × 128) |
 | Thumbnail | `assets/cover.mp4` (video, 1920 × 1080). If the form rejects it, use `assets/cover.png`. |
-| Carousel (optional) | `assets/cover.gif`, `assets/cover.png`, `assets/shortcut-en.gif` (how to set up the shortcut) |
+| Carousel (optional) | `assets/cover.gif`, `assets/cover.png`, `assets/usage-en.gif` (how to use it), `assets/shortcut-en.gif` (how to set up the shortcut) |
 | Support contact | https://docs.google.com/forms/d/e/1FAIpQLSeSW8T6jTH7-0Vgd6DsBZE14iGYCRsVAxkcF2ton4zTk7KvVA/viewform |
 | Network access | None |
 

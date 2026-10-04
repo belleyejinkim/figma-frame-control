@@ -1,0 +1,243 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>How to use Frame Name Control</title>
+<!--
+  One page renders every frame of the "how to use" walkthrough. The plugin window is the real
+  ui.html, loaded into an iframe and fed the same state message the plugin sends it.
+  Query parameters set the state:
+    lang=en|ko         language of the caption, the plugin window, and the Figma toast
+    cap=1..4           caption shown above the stage
+    names=hidden       the frame names on the canvas are hidden
+    scope=page|document|selection   scope selected in the window
+    toast=hid|restored Figma notification at the bottom of the canvas
+    panel=tools        show Figma's right panel instead of the plugin window
+    cursor=toggle|scope|relaunch    where the pointer sits
+    press=1            the thing under the pointer is being clicked
+  Build everything with: python3 assets/src/build.py
+-->
+<style>
+  html, body { margin: 0; }
+  body {
+    width: 1240px; height: 840px; overflow: hidden; box-sizing: border-box; padding: 40px 70px;
+    background: #2C2C2C; color: #FFFFFF;
+    font-family: "Pretendard", "Inter", -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  [hidden] { display: none !important; }
+
+  .caption { display: flex; align-items: center; gap: 18px; margin: 0 0 28px; height: 44px; }
+  .caption .step {
+    flex: none; width: 44px; height: 44px; border-radius: 50%; background: #0D99FF;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;
+  }
+  .caption .text { font-size: 29px; font-weight: 500; letter-spacing: -0.01em; color: #F5F5F3; }
+
+  .stage { display: flex; align-items: flex-start; gap: 32px; height: 648px; }
+  .side { width: 380px; flex: none; display: flex; justify-content: flex-end; align-items: flex-start; }
+
+  /* The plugin window, with the frame Figma draws around it. */
+  .plugin { width: 380px; display: flex; flex-direction: column;
+            border-radius: 12px; overflow: hidden; background: #FFFFFF;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.2); }
+  .plugin-bar { display: flex; align-items: center; justify-content: space-between;
+                height: 40px; padding: 0 14px; border-bottom: 1px solid #E6E6E6;
+                font: 600 12px/1 "Inter", -apple-system, sans-serif; color: #1E1E1E; }
+  .plugin-bar .dots { color: #8A8A8A; font-size: 15px; letter-spacing: 2px; }
+  .plugin iframe { display: block; width: 380px; border: 0; background: #FFFFFF; }
+
+  /* Figma's canvas. */
+  .canvas { flex: 1; align-self: stretch; position: relative; border-radius: 16px; background: #EDEDEA; overflow: hidden; }
+  .label { position: absolute; top: 64px; font: 500 20px/1 "Inter", -apple-system, sans-serif; color: #5F5F5A; }
+  body.hidden-names .label { opacity: 0; }
+  .art {
+    position: absolute; top: 96px; width: 240px; height: 380px; box-sizing: border-box; padding: 20px;
+    background: #FFFFFF; border-radius: 10px; box-shadow: 0 1px 0 #DADAD5, 0 12px 28px rgba(17, 19, 24, 0.10);
+  }
+  .a { left: 92px; } .b { left: 356px; }
+  .bar { height: 12px; border-radius: 6px; background: #ECECE8; margin-bottom: 13px; }
+  .img { height: 140px; border-radius: 8px; background: #DDEBFA; margin-bottom: 17px; }
+  .b .img { background: #F6E3D4; }
+  .line { height: 10px; border-radius: 5px; background: #EFEFEB; margin-bottom: 10px; }
+  .btn { height: 36px; border-radius: 8px; background: #1A1C21; margin-top: 20px; }
+
+  .toast {
+    position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%);
+    padding: 13px 20px; border-radius: 10px; background: #1E1E1E; color: #FFFFFF;
+    font: 500 17px/1 "Inter", "Pretendard", -apple-system, sans-serif; white-space: nowrap;
+    box-shadow: 0 12px 30px rgba(17, 19, 24, 0.3);
+  }
+
+  /* Figma's right panel, where the relaunch button shows up. */
+  .panel { width: 300px; background: #FFFFFF; border-radius: 12px; overflow: hidden;
+           box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.2);
+           font: 13px/1.5 "Inter", "Pretendard", -apple-system, sans-serif; color: #1E1E1E; }
+  .tabs { display: flex; gap: 20px; padding: 12px 16px 0; border-bottom: 1px solid #E6E6E6; font-weight: 500; color: #8A8A8A; }
+  .tabs b { color: #1E1E1E; font-weight: 600; border-bottom: 2px solid #1E1E1E; padding-bottom: 9px; }
+  .panel .sect { padding: 14px 16px; border-bottom: 1px solid #E6E6E6; }
+  .panel .sect h4 { margin: 0 0 10px; font-size: 12px; font-weight: 600; }
+  .panel .ghost { height: 28px; border-radius: 5px; background: #F5F5F5; margin-bottom: 8px; }
+  .panel .ghost:last-child { margin-bottom: 0; }
+  .tool { display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 8px; border-radius: 5px; }
+  .tool img { width: 18px; height: 18px; border-radius: 3px; flex: none; }
+  .tool .minus { margin-left: auto; color: #8A8A8A; font-size: 15px; }
+  body.press .tool { background: #E5E5E5; }
+
+  .cursor { position: absolute; width: 30px; height: 38px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35)); }
+  body.no-cursor .cursor { display: none; }
+</style>
+
+<p class="caption"><span class="step" id="step">1</span><span class="text" id="cap"></span></p>
+
+<div class="stage" id="stage">
+  <div class="canvas">
+    <div class="label" style="left: 92px">Frame 1</div>
+    <div class="label" style="left: 356px">Frame 2</div>
+    <div class="art a">
+      <div class="bar" style="width: 46%"></div>
+      <div class="img"></div>
+      <div class="line" style="width: 88%"></div>
+      <div class="line" style="width: 70%"></div>
+      <div class="line" style="width: 54%"></div>
+      <div class="btn"></div>
+    </div>
+    <div class="art b">
+      <div class="bar" style="width: 38%"></div>
+      <div class="img"></div>
+      <div class="line" style="width: 80%"></div>
+      <div class="line" style="width: 92%"></div>
+      <div class="line" style="width: 48%"></div>
+      <div class="btn"></div>
+    </div>
+    <div class="toast" id="toast" hidden></div>
+  </div>
+
+  <div class="side">
+  <div class="plugin" id="plugin">
+    <div class="plugin-bar"><span>Frame Name Control</span><span class="dots">···</span></div>
+    <iframe id="ui" title="Frame Name Control" scrolling="no" height="631"></iframe>
+  </div>
+
+  <div class="panel" id="panel" hidden>
+    <div class="tabs"><b>Design</b><span>Prototype</span></div>
+    <div class="sect">
+      <h4 id="p-page"></h4>
+      <div class="ghost"></div>
+    </div>
+    <div class="sect">
+      <h4 id="p-layer"></h4>
+      <div class="ghost"></div>
+      <div class="ghost"></div>
+    </div>
+    <div class="sect" style="border-bottom: 0;">
+      <h4 id="p-tools"></h4>
+      <div class="tool" id="relaunch">
+        <img src="/assets/icon.png" alt="">
+        <span>Hide/Show Frame Name</span>
+        <span class="minus">−</span>
+      </div>
+    </div>
+  </div>
+  </div>
+</div>
+
+<svg class="cursor" id="cursor" viewBox="0 0 22 28" aria-hidden="true">
+  <path d="M2 1.5v21.2l5.2-5 3.4 8 3.3-1.4-3.3-7.8h7.2z" fill="#111111" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+</svg>
+
+<script>
+  var T = {
+    en: {
+      page: 'Page', layer: 'Layer', tools: 'Tools',
+      hid: 'Hid 2 names', restored: 'Restored 2 names',
+      scope: { page: 'This page', document: 'All pages', selection: 'Selection' },
+      caps: [
+        'Click Hide frame names in the plugin window — the labels leave the canvas',
+        'Click it again, and every name comes back the way it was',
+        'Scope decides what changes: this page, all pages, or what you selected',
+        'After the first run, the right panel button does the same without the window'
+      ]
+    },
+    ko: {
+      page: '페이지', layer: '레이어', tools: 'Tools',
+      hid: '숨김 2개', restored: '복구 2개',
+      scope: { page: '이 페이지', document: '모든 페이지', selection: '선택 영역' },
+      caps: [
+        '플러그인 창에서 이름 숨기기를 누르면 캔버스의 프레임 이름이 사라집니다',
+        '다시 누르면 이름이 그대로 돌아옵니다',
+        '적용 범위로 이 페이지, 모든 페이지, 선택한 레이어 중에서 고릅니다',
+        '한 번 쓰고 나면 오른쪽 패널 버튼으로 창 없이 껐다 켭니다'
+      ]
+    }
+  };
+
+  var q = new URLSearchParams(location.search);
+  var lang = q.get('lang') === 'ko' ? 'ko' : 'en';
+  var t = T[lang];
+  document.documentElement.lang = lang;
+
+  var cap = Number(q.get('cap') || 1);
+  document.getElementById('step').textContent = cap;
+  document.getElementById('cap').textContent = t.caps[cap - 1];
+  document.getElementById('p-page').textContent = t.page;
+  document.getElementById('p-layer').textContent = t.layer;
+  document.getElementById('p-tools').textContent = t.tools;
+
+  var hidden = q.get('names') === 'hidden';
+  var scope = q.get('scope') || 'page';
+  document.body.classList.toggle('hidden-names', hidden);
+  document.body.classList.toggle('press', q.get('press') === '1');
+
+  var toast = document.getElementById('toast');
+  var which = q.get('toast');
+  toast.hidden = !which;
+  if (which) toast.textContent = (which === 'hid' ? t.hid : t.restored) + ' · ' + t.scope[scope];
+
+  var tools = q.get('panel') === 'tools';
+  document.getElementById('panel').hidden = !tools;
+  document.getElementById('plugin').hidden = tools;
+
+  // The window is the real ui.html, rendered by the same message the plugin sends it.
+  var state = {
+    type: 'state', language: lang,
+    settings: { scope: scope, language: lang, detectedLanguage: lang, onboarded: true },
+    status: { hidden: hidden ? 2 : 0, total: 2 },
+    links: { linkedin: true }
+  };
+  var frame = document.getElementById('ui');
+
+  function placeCursor() {
+    var name = q.get('cursor');
+    var target = null, offset = { x: 0, y: 0 };
+    if (name === 'relaunch') {
+      target = document.getElementById('relaunch');
+    } else if (name === 'toggle' || name === 'scope') {
+      var doc = frame.contentDocument;
+      var box = frame.getBoundingClientRect();
+      offset = { x: box.left, y: box.top };
+      target = name === 'toggle' ? doc.getElementById('btn-toggle')
+             : doc.querySelector('input[name="scope"][value="document"]');
+    }
+    if (!target) { document.body.classList.add('no-cursor'); return; }
+    var r = target.getBoundingClientRect();
+    var cursor = document.getElementById('cursor');
+    cursor.style.left = (offset.x + r.left + r.width / 2) + 'px';
+    cursor.style.top = (offset.y + r.top + r.height * 0.55) + 'px';
+  }
+
+  if (tools) {
+    placeCursor();
+  } else {
+    // The state goes straight into the window's own message handler, so it has finished
+    // rendering by the time the iframe fires load and we can measure it. The plugin clamps
+    // the window to 240-680, so this does too.
+    frame.addEventListener('load', function () {
+      var doc = frame.contentDocument;
+      frame.height = Math.min(Math.max(doc.body.scrollHeight, 240), 680);
+      if (q.get('press') === '1') doc.getElementById('btn-toggle').style.background = '#0A7ED6';
+      placeCursor();
+    });
+    fetch('/ui.html').then(function (r) { return r.text(); }).then(function (src) {
+      frame.srcdoc = src + '<scr' + 'ipt>onmessage({ data: ' + JSON.stringify({ pluginMessage: state }) + ' });</scr' + 'ipt>';
+    });
+  }
+</script>

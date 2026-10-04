@@ -35,6 +35,15 @@ You import the plugin once, and it appears in every file. Import through the **P
 Manifest error: Expected "manifest.containsWidget" to have type true but got undefined instead
 ```
 
+## How to use
+
+![Click Hide frame names in the plugin window to clear the labels, click again to bring them back, pick a scope, and use the right panel button afterwards](assets/usage-en.gif)
+
+1. Open the plugin and click **Hide frame names**. The labels leave the canvas, and Figma says how many names it hid.
+2. Click the button again, and every name comes back the way it was.
+3. **Scope** decides what changes: this page, all pages, or the layers you selected.
+4. After the first run in a file, the **Hide/Show Frame Name** button in the right panel does the same without opening the window.
+
 ## Commands
 
 Most of the time, **Open** is all you need: the plugin window has buttons to hide and restore names. The other commands do the same without the window. The first time you run one of them, the plugin opens its window instead, so you can read how it changes names before you hide them.
@@ -94,7 +103,7 @@ manifest.json            plugin definition and menu commands
 code.js                  hide and restore logic (no build step)
 ui.html                  plugin window
 test/logic.test.js       tests for the hide and restore logic
-assets/                  icon, cover, and the shortcut walkthrough (sources in assets/src)
+assets/                  icon, cover, and the walkthrough images (sources in assets/src)
 ```
 
 The plugin uses no TypeScript or bundler. After you edit a file, choose **Plugins → Development → Hot reload plugin** in Figma.

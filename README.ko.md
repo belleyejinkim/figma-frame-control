@@ -35,6 +35,15 @@ Frame Name Control은 곧 Figma Community에 올라갑니다. 공개되면 Figma
 Manifest error: Expected "manifest.containsWidget" to have type true but got undefined instead
 ```
 
+## 사용 방법
+
+![플러그인 창에서 이름 숨기기를 누르면 캔버스의 라벨이 사라지고, 다시 누르면 돌아옵니다. 적용 범위를 고르고, 그다음부터는 오른쪽 패널 버튼으로 껐다 켭니다](assets/usage-ko.gif)
+
+1. 플러그인을 열고 **이름 숨기기**를 누릅니다. 캔버스에서 프레임 이름이 사라지고, 몇 개를 숨겼는지 Figma 알림으로 알려 줍니다.
+2. 버튼을 다시 누르면 이름이 그대로 돌아옵니다.
+3. **적용 범위**로 이 페이지, 모든 페이지, 선택한 레이어 중에서 고릅니다.
+4. 파일에서 한 번 쓰고 나면, 창을 열지 않고 오른쪽 패널의 **Hide/Show Frame Name** 버튼으로 껐다 켤 수 있습니다.
+
 ## 명령
 
 대부분은 **Open**만 쓰면 됩니다. 플러그인 창의 버튼으로 이름을 숨기고 되돌릴 수 있습니다. 나머지 명령은 창 없이 같은 일을 합니다. 이 명령들을 처음 실행하면 이름을 바로 바꾸지 않고 플러그인 창을 먼저 열어, 이름을 어떻게 바꾸는지 보여 줍니다.
@@ -94,7 +103,7 @@ manifest.json            플러그인 정의와 메뉴 명령
 code.js                  숨김·복구 로직 (빌드 단계 없음)
 ui.html                  플러그인 창
 test/logic.test.js       숨김·복구 로직 테스트
-assets/                  아이콘, 커버, 단축키 설정 안내 이미지(원본은 assets/src)
+assets/                  아이콘, 커버, 안내 이미지(원본은 assets/src)
 ```
 
 TypeScript도 번들러도 쓰지 않습니다. 파일을 고친 뒤 Figma에서 **Plugins → Development → Hot reload plugin**을 누르면 바로 적용됩니다.

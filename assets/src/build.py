@@ -15,6 +15,8 @@ from PIL import Image
 
 SRC = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.dirname(SRC)
+# The usage page loads the real ui.html, so the whole project is served.
+ROOT = os.path.dirname(ASSETS)
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 # (query, milliseconds). One loop: click the button to hide, press ⌥⌘F to bring names back.
@@ -51,6 +53,23 @@ SHORTCUT = [
 SHORTCUT_SIZE = (1240, 820)
 SHORTCUT_KEYFRAMES = (0, 4, 7, 11)
 
+# (query, milliseconds). Hiding names, bringing them back, scope, and the right panel button.
+USAGE = [
+    ("cap=1&cursor=toggle", 1300),
+    ("cap=1&cursor=toggle&press=1", 200),
+    ("cap=1&names=hidden&toast=hid&cursor=toggle", 1600),
+    ("cap=2&names=hidden&cursor=toggle", 1000),
+    ("cap=2&names=hidden&cursor=toggle&press=1", 200),
+    ("cap=2&toast=restored&cursor=toggle", 1600),
+    ("cap=3&cursor=scope", 1100),
+    ("cap=3&scope=document&cursor=scope", 1400),
+    ("cap=4&panel=tools&cursor=relaunch", 1300),
+    ("cap=4&panel=tools&cursor=relaunch&press=1", 200),
+    ("cap=4&panel=tools&names=hidden&toast=hid", 1600),
+]
+USAGE_SIZE = (1240, 840)
+USAGE_KEYFRAMES = (0, 2, 7, 10)
+
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
@@ -58,7 +77,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 
 def serve():
-    handler = partial(QuietHandler, directory=SRC)
+    handler = partial(QuietHandler, directory=ROOT)
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     return server
@@ -102,22 +121,28 @@ def main():
     try:
         # Icon: render large, then scale down for clean edges.
         big = os.path.join(work, "icon-512.png")
-        shoot(f"{base}/icon.html", big, 512, 512)
+        shoot(f"{base}/assets/src/icon.html", big, 512, 512)
         Image.open(big).convert("RGB").resize((128, 128), Image.LANCZOS).save(os.path.join(ASSETS, "icon.png"))
 
         # Static cover.
-        shoot(f"{base}/cover.html?{STATIC_COVER}", os.path.join(ASSETS, "cover.png"), 1920, 1080)
+        shoot(f"{base}/assets/src/cover.html?{STATIC_COVER}", os.path.join(ASSETS, "cover.png"), 1920, 1080)
 
         # Animated cover.
-        cover = shoot_all(base, "cover.html", TIMELINE, COVER_SIZE, work, "frame")
+        cover = shoot_all(base, "assets/src/cover.html", TIMELINE, COVER_SIZE, work, "frame")
         write_gif(os.path.join(ASSETS, "cover.gif"), cover, TIMELINE, COVER_SIZE, COVER_KEYFRAMES)
 
         # Walkthrough of the macOS shortcut setup, one GIF per language.
         for lang in ("en", "ko"):
             steps = [(f"lang={lang}&{query}", ms) for query, ms in SHORTCUT]
-            shots = shoot_all(base, "shortcut.html", steps, SHORTCUT_SIZE, work, f"shortcut-{lang}")
+            shots = shoot_all(base, "assets/src/shortcut.html", steps, SHORTCUT_SIZE, work, f"shortcut-{lang}")
             write_gif(os.path.join(ASSETS, f"shortcut-{lang}.gif"), shots, steps, SHORTCUT_SIZE,
                       SHORTCUT_KEYFRAMES)
+
+        # Walkthrough of the plugin itself, one GIF per language.
+        for lang in ("en", "ko"):
+            steps = [(f"lang={lang}&{query}", ms) for query, ms in USAGE]
+            shots = shoot_all(base, "assets/src/usage.html", steps, USAGE_SIZE, work, f"usage-{lang}")
+            write_gif(os.path.join(ASSETS, f"usage-{lang}.gif"), shots, steps, USAGE_SIZE, USAGE_KEYFRAMES)
 
         # MP4 for the Figma Community thumbnail: two loops at 30 fps.
         listing = os.path.join(work, "frames.txt")
