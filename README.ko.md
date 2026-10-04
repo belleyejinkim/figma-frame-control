@@ -57,6 +57,8 @@ Manifest error: Expected "manifest.containsWidget" to have type true but got und
 
 Figma는 플러그인에 단축키를 줄 수 없지만, macOS는 메뉴 항목에 단축키를 붙일 수 있습니다. 컴퓨터마다 한 번, 1분이면 끝납니다.
 
+![설정 과정: 시스템 설정 → 키보드 → 키보드 단축키에서 앱 단축키를 고르고, Figma에 메뉴 제목 Toggle Frame Names로 ⌥⌘F를 등록합니다](assets/shortcut-ko.gif)
+
 1. **시스템 설정 → 키보드**를 열고 **키보드 단축키…** 버튼을 누릅니다.
 2. 왼쪽에서 **앱 단축키**를 고르고 **+** 버튼을 누릅니다.
 3. 응용 프로그램에서 **Figma**를 고르고, 메뉴 제목에 `Toggle Frame Names`를 입력합니다. 글자가 정확히 같아야 하니 플러그인 창의 복사 버튼을 쓰는 편이 안전합니다.
@@ -92,7 +94,7 @@ manifest.json            플러그인 정의와 메뉴 명령
 code.js                  숨김·복구 로직 (빌드 단계 없음)
 ui.html                  플러그인 창
 test/logic.test.js       숨김·복구 로직 테스트
-assets/                  Figma Community 아이콘, 커버 이미지, GIF, 동영상
+assets/                  아이콘, 커버, 단축키 설정 안내 이미지(원본은 assets/src)
 ```
 
 TypeScript도 번들러도 쓰지 않습니다. 파일을 고친 뒤 Figma에서 **Plugins → Development → Hot reload plugin**을 누르면 바로 적용됩니다.
@@ -103,7 +105,7 @@ TypeScript도 번들러도 쓰지 않습니다. 파일을 고친 뒤 Figma에서
 node test/logic.test.js
 ```
 
-아이콘과 커버는 `assets/src`의 HTML 파일로 만듭니다. 다시 만들려면 Google Chrome, Pillow, ffmpeg가 필요합니다.
+이미지는 `assets/src`의 HTML 파일로 만듭니다. 다시 만들려면 Google Chrome, Pillow, ffmpeg가 필요합니다.
 
 ```bash
 python3 assets/src/build.py

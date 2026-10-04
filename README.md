@@ -57,6 +57,8 @@ The button is saved with the file, so people who open the file see it too. To re
 
 Figma can't give plugins a shortcut, but macOS can bind one to any menu item. It takes a minute, once per computer.
 
+![Walkthrough: in System Settings → Keyboard → Keyboard Shortcuts, pick App Shortcuts, add one for Figma with the menu title Toggle Frame Names, and record ⌥⌘F](assets/shortcut-en.gif)
+
 1. Open **System Settings → Keyboard**, then click **Keyboard Shortcuts…**
 2. Pick **App Shortcuts** on the left, then click **+**.
 3. Choose **Figma**, and enter `Toggle Frame Names` as the menu title. It has to match exactly, so copy it from the plugin window.
@@ -92,7 +94,7 @@ manifest.json            plugin definition and menu commands
 code.js                  hide and restore logic (no build step)
 ui.html                  plugin window
 test/logic.test.js       tests for the hide and restore logic
-assets/                  Figma Community icon, cover image, GIF, and video
+assets/                  icon, cover, and the shortcut walkthrough (sources in assets/src)
 ```
 
 The plugin uses no TypeScript or bundler. After you edit a file, choose **Plugins → Development → Hot reload plugin** in Figma.
@@ -103,7 +105,7 @@ The tests run `code.js` against a fake Figma API:
 node test/logic.test.js
 ```
 
-The icon and cover assets are built from the HTML files in `assets/src`. Rebuilding them needs Google Chrome, Pillow, and ffmpeg:
+The images are rendered from the HTML files in `assets/src`. Rebuilding them needs Google Chrome, Pillow, and ffmpeg:
 
 ```bash
 python3 assets/src/build.py

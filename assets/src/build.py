@@ -1,4 +1,4 @@
-"""Render the icon and cover assets from the HTML sources in this folder.
+"""Render the icon, cover, and shortcut assets from the HTML sources in this folder.
 
 Needs Google Chrome, Pillow, and ffmpeg:
     python3 assets/src/build.py
@@ -30,6 +30,26 @@ TIMELINE = [
     ("labels=1&toast=restored", 1300),
 ]
 STATIC_COVER = "labels=0&names=hidden&ghost=1&toast=hid&cursor=1"
+COVER_SIZE = (1920, 1080)
+COVER_KEYFRAMES = (0, 3, 7)
+
+# (query, milliseconds). Setting up the macOS shortcut, start to finish. Rendered once per language.
+SHORTCUT = [
+    ("cap=1&cursor=shortcuts", 1200),
+    ("cap=1&cursor=shortcuts&press=shortcuts", 220),
+    ("cap=2&view=sheet&sel=dock&cursor=apps", 1100),
+    ("cap=2&view=sheet&sel=apps&cursor=plus", 1000),
+    ("cap=2&view=sheet&sel=apps&cursor=plus&press=plus", 200),
+    ("cap=3&view=add&fields=empty&cursor=app", 900),
+    ("cap=3&view=add&fields=picked", 700),
+    ("cap=3&view=add&fields=typed", 1300),
+    ("cap=4&view=add&fields=recording&cursor=shortcut", 800),
+    ("cap=4&view=add&fields=recorded&cursor=add-done", 1000),
+    ("cap=4&view=add&fields=recorded&cursor=add-done&press=add-done", 200),
+    ("cap=5&view=sheet&sel=apps&added=1&cursor=done", 2100),
+]
+SHORTCUT_SIZE = (1240, 820)
+SHORTCUT_KEYFRAMES = (0, 4, 7, 11)
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
@@ -52,6 +72,29 @@ def shoot(url, out, width, height):
     )
 
 
+def shoot_all(base, page, timeline, size, work, tag):
+    frames = []
+    for i, (query, _) in enumerate(timeline):
+        path = os.path.join(work, f"{tag}-{i:02d}.png")
+        shoot(f"{base}/{page}?{query}", path, *size)
+        frames.append(path)
+    return frames
+
+
+def write_gif(out, paths, timeline, size, keyframes):
+    """One shared palette, so flat areas don't flicker between frames."""
+    frames = [Image.open(p).convert("RGB") for p in paths]
+    sheet = Image.new("RGB", (size[0], size[1] * len(keyframes)))
+    for row, idx in enumerate(keyframes):
+        sheet.paste(frames[idx], (0, size[1] * row))
+    palette = sheet.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
+    indexed = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
+    indexed[0].save(
+        out, save_all=True, append_images=indexed[1:],
+        duration=[ms for _, ms in timeline], loop=0, optimize=False, disposal=1,
+    )
+
+
 def main():
     server = serve()
     base = f"http://127.0.0.1:{server.server_address[1]}"
@@ -65,31 +108,24 @@ def main():
         # Static cover.
         shoot(f"{base}/cover.html?{STATIC_COVER}", os.path.join(ASSETS, "cover.png"), 1920, 1080)
 
-        # Animation frames.
-        frames = []
-        for i, (query, _) in enumerate(TIMELINE):
-            path = os.path.join(work, f"frame-{i:02d}.png")
-            shoot(f"{base}/cover.html?{query}", path, 1920, 1080)
-            frames.append(Image.open(path).convert("RGB"))
+        # Animated cover.
+        cover = shoot_all(base, "cover.html", TIMELINE, COVER_SIZE, work, "frame")
+        write_gif(os.path.join(ASSETS, "cover.gif"), cover, TIMELINE, COVER_SIZE, COVER_KEYFRAMES)
 
-        # GIF: one shared palette so flat areas don't flicker between frames.
-        sheet = Image.new("RGB", (1920, 1080 * 3))
-        for row, idx in enumerate((0, 3, 7)):
-            sheet.paste(frames[idx], (0, 1080 * row))
-        palette = sheet.quantize(colors=255, method=Image.Quantize.MEDIANCUT)
-        indexed = [f.quantize(palette=palette, dither=Image.Dither.NONE) for f in frames]
-        indexed[0].save(
-            os.path.join(ASSETS, "cover.gif"), save_all=True, append_images=indexed[1:],
-            duration=[ms for _, ms in TIMELINE], loop=0, optimize=False, disposal=1,
-        )
+        # Walkthrough of the macOS shortcut setup, one GIF per language.
+        for lang in ("en", "ko"):
+            steps = [(f"lang={lang}&{query}", ms) for query, ms in SHORTCUT]
+            shots = shoot_all(base, "shortcut.html", steps, SHORTCUT_SIZE, work, f"shortcut-{lang}")
+            write_gif(os.path.join(ASSETS, f"shortcut-{lang}.gif"), shots, steps, SHORTCUT_SIZE,
+                      SHORTCUT_KEYFRAMES)
 
         # MP4 for the Figma Community thumbnail: two loops at 30 fps.
         listing = os.path.join(work, "frames.txt")
         with open(listing, "w") as fh:
             for _ in range(2):
-                for i, (_, ms) in enumerate(TIMELINE):
-                    fh.write(f"file '{os.path.join(work, f'frame-{i:02d}.png')}'\nduration {ms / 1000:.3f}\n")
-            fh.write(f"file '{os.path.join(work, 'frame-00.png')}'\n")
+                for (_, ms), path in zip(TIMELINE, cover):
+                    fh.write(f"file '{path}'\nduration {ms / 1000:.3f}\n")
+            fh.write(f"file '{cover[0]}'\n")
         subprocess.run(
             ["ffmpeg", "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", listing,
              "-vf", "fps=30,format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", "18",

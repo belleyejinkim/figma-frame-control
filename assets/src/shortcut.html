@@ -1,0 +1,372 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Set up a shortcut</title>
+<!--
+  One page renders every frame of the "set up a shortcut" walkthrough. Query parameters set the state:
+    lang=en|ko         language of the caption and of the macOS interface
+    cap=1..5           caption shown above the window
+    view=pane|sheet|add  which layer is on top
+    sel=dock|apps      selected category in the Keyboard Shortcuts sheet
+    added=1            the Figma shortcut is already in the list
+    fields=empty|picked|typed|recording|recorded   how far the add sheet is filled in
+    cursor=<name>      element the pointer sits on (data-cursor)
+    press=<name>       element being clicked
+
+  The macOS labels come from the system itself, so they match what people see:
+    /System/Library/ExtensionKit/Extensions/KeyboardSettings.appex/Contents/Resources
+  Build everything with: python3 assets/src/build.py
+-->
+<style>
+  html, body { margin: 0; }
+  body {
+    width: 1240px; height: 820px; overflow: hidden; box-sizing: border-box; padding: 40px 70px;
+    background: #2C2C2C; color: #FFFFFF;
+    font-family: "Pretendard", "Inter", -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  [hidden] { display: none !important; }
+
+  .caption { display: flex; align-items: center; gap: 18px; margin: 0 0 28px; height: 44px; }
+  .caption .step {
+    flex: none; width: 44px; height: 44px; border-radius: 50%; background: #0D99FF;
+    display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700;
+  }
+  .caption .text { font-size: 29px; font-weight: 500; letter-spacing: -0.01em; color: #F5F5F3; }
+
+  /* macOS System Settings, drawn at about 1.6x so the type stays readable in a GIF. */
+  .window {
+    position: relative; width: 1100px; height: 660px; border-radius: 16px; overflow: hidden;
+    display: flex; background: #F5F5F5; color: #1D1D1F;
+    font-family: -apple-system, "SF Pro Text", "Helvetica Neue", sans-serif; font-size: 21px;
+    box-shadow: 0 30px 70px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+  body.ko .window { font-family: "Apple SD Gothic Neo", -apple-system, sans-serif; }
+
+  .sidebar { width: 290px; flex: none; background: #E7E7E7; padding: 0 14px; box-sizing: border-box; }
+  .lights { display: flex; gap: 13px; padding: 23px 10px 26px; }
+  .lights i { width: 19px; height: 19px; border-radius: 50%; background: #FF5F57; }
+  .lights i:nth-child(2) { background: #FEBC2E; }
+  .lights i:nth-child(3) { background: #28C840; }
+  .nav { display: flex; align-items: center; gap: 13px; height: 46px; padding: 0 12px; border-radius: 9px; }
+  .nav.on { background: #0A64D2; color: #FFFFFF; }
+  .tile { flex: none; width: 29px; height: 29px; border-radius: 7px; background: #8E8E93; }
+  .nav.on .tile { background: #FFFFFF; }
+
+  .pane { flex: 1; padding: 26px 32px; box-sizing: border-box; }
+  .pane h2 { margin: 0 0 24px; font-size: 26px; font-weight: 700; letter-spacing: -0.01em; }
+  .group { background: #FFFFFF; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07); }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 20px; height: 58px; padding: 0 20px; }
+  .row + .row { border-top: 1px solid #ECECEC; }
+  .track { position: relative; width: 250px; height: 5px; border-radius: 3px; background: #D8D8DC; }
+  .track i { position: absolute; top: -8px; width: 21px; height: 21px; border-radius: 50%; background: #FFFFFF;
+             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3); }
+  .switch { width: 51px; height: 31px; border-radius: 16px; background: #34C759; position: relative; }
+  .switch i { position: absolute; right: 2px; top: 2px; width: 27px; height: 27px; border-radius: 50%; background: #FFFFFF;
+              box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25); }
+  .push {
+    padding: 9px 18px; border-radius: 9px; background: #FFFFFF; font-size: 20px; font-weight: 500;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+  .push.down { background: #E3E3E3; }
+  .muted { color: #86868B; }
+
+  /* Keyboard Shortcuts sheet */
+  .sheet {
+    position: absolute; left: 100px; top: 28px; width: 900px; height: 572px; border-radius: 14px;
+    background: #F2F2F2; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35); display: flex; flex-direction: column;
+  }
+  .sheet-body { flex: 1; display: flex; min-height: 0; }
+  .cats { width: 250px; flex: none; padding: 10px; box-sizing: border-box; overflow: hidden; }
+  .cat { display: flex; align-items: center; gap: 11px; height: 38px; padding: 0 10px; border-radius: 8px; font-size: 19px; }
+  .cat .tile { width: 23px; height: 23px; border-radius: 6px; }
+  .cat.on { background: #0A64D2; color: #FFFFFF; }
+  .cat.on .tile { background: #FFFFFF; }
+  .list {
+    flex: 1; margin: 12px 12px 0 0; background: #FFFFFF; border-radius: 9px; box-shadow: inset 0 0 0 1px #DCDCDC;
+    overflow: hidden; font-size: 19px;
+  }
+  .head { padding: 11px 16px; font-weight: 600; background: #F7F7F7; border-bottom: 1px solid #E6E6E6; }
+  .item { display: flex; align-items: center; justify-content: space-between; height: 42px; padding: 0 16px 0 34px; }
+  .item + .item { border-top: 1px solid #F0F0F0; }
+  .item .combo { font-family: -apple-system, "SF Pro Text", sans-serif; color: #3C3C43; }
+  .item.new { background: #E8F1FD; }
+  .plusminus { display: flex; gap: 0; margin: 10px 12px 0 0; }
+  .pm {
+    width: 44px; height: 34px; display: flex; align-items: center; justify-content: center;
+    background: #FFFFFF; font-size: 24px; line-height: 1; color: #1D1D1F;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+  .pm:first-child { border-radius: 8px 0 0 8px; }
+  .pm:last-child { border-radius: 0 8px 8px 0; color: #9C9CA0; }
+  .pm.down { background: #E3E3E3; }
+  .sheet-foot { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; }
+  .btn { padding: 10px 22px; border-radius: 9px; background: #FFFFFF; font-size: 20px; font-weight: 500;
+         box-shadow: 0 1px 2px rgba(0, 0, 0, 0.18), inset 0 0 0 1px rgba(0, 0, 0, 0.06); }
+  .btn.blue { background: #0A64D2; color: #FFFFFF; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2); }
+  .btn.blue.down { background: #0850A8; }
+  .btn.down { background: #E3E3E3; }
+
+  /* Add sheet */
+  .add {
+    position: absolute; left: 70px; top: 112px; width: 760px; border-radius: 14px; background: #F2F2F2;
+    padding: 30px 30px 22px; box-sizing: border-box; box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+  }
+  .field { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 20px; }
+  .field > .label { width: 196px; flex: none; text-align: right; padding-top: 9px; font-size: 20px; }
+  .field > .control { flex: 1; }
+  .pop {
+    display: flex; align-items: center; gap: 9px; height: 38px; padding: 0 12px; border-radius: 8px; background: #FFFFFF;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.1); font-size: 20px;
+  }
+  .pop svg { width: 14px; height: 21px; flex: none; }
+  .pop .chev {
+    margin-left: auto; width: 22px; height: 30px; border-radius: 5px; background: #0A64D2; color: #FFFFFF;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 12px; line-height: 1;
+  }
+  .input {
+    height: 38px; padding: 0 12px; border-radius: 8px; background: #FFFFFF; display: flex; align-items: center;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14); font-size: 20px;
+  }
+  .input.focus { box-shadow: inset 0 0 0 1px #0A64D2, 0 0 0 4px rgba(10, 100, 210, 0.25); }
+  .input .caret { width: 2px; height: 22px; background: #1D1D1F; margin-left: 1px; }
+  .hint { margin: 9px 0 0; font-size: 17px; color: #86868B; line-height: 1.35; }
+  .add-foot { display: flex; justify-content: flex-end; gap: 12px; margin-top: 26px; }
+
+  .cursor { position: absolute; width: 34px; height: 44px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35)); }
+  body.no-cursor .cursor { display: none; }
+</style>
+
+<p class="caption"><span class="step" id="step">1</span><span class="text" id="cap"></span></p>
+
+<div class="window">
+  <aside class="sidebar">
+    <div class="lights"><i></i><i></i><i></i></div>
+    <div id="nav"></div>
+  </aside>
+
+  <section class="pane">
+    <h2 id="pane-title">Keyboard</h2>
+    <div class="group">
+      <div class="row"><span id="r-repeat"></span><span class="track"><i style="left: 170px"></i></span></div>
+      <div class="row"><span id="r-delay"></span><span class="track"><i style="left: 96px"></i></span></div>
+    </div>
+    <div class="group">
+      <div class="row"><span id="r-nav"></span><span class="switch"><i></i></span></div>
+      <div class="row"><span id="r-bright"></span><span class="switch"><i></i></span></div>
+    </div>
+    <div class="group">
+      <div class="row" style="justify-content: flex-end;">
+        <span class="push" id="b-shortcuts" data-cursor="shortcuts"></span>
+      </div>
+    </div>
+    <div class="group">
+      <div class="row"><span id="r-text"></span><span class="muted">›</span></div>
+      <div class="row"><span id="r-dictation"></span><span class="muted">›</span></div>
+    </div>
+  </section>
+
+  <div class="sheet" id="sheet" hidden>
+    <div class="sheet-body">
+      <div class="cats" id="cats"></div>
+      <div style="flex: 1; display: flex; flex-direction: column; min-height: 0;">
+        <div class="list">
+          <div class="head" id="all-apps"></div>
+          <div class="item"><span id="help-menu"></span><span class="combo">⇧⌘/</span></div>
+          <div id="figma-group" hidden>
+            <div class="head">Figma</div>
+            <div class="item new"><span>Toggle Frame Names</span><span class="combo">⌥⌘F</span></div>
+          </div>
+        </div>
+        <div class="plusminus">
+          <span class="pm" id="b-plus" data-cursor="plus">+</span>
+          <span class="pm">−</span>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-foot">
+      <span class="btn" id="b-restore"></span>
+      <span class="btn blue" id="b-done" data-cursor="done"></span>
+    </div>
+
+    <div class="add" id="add" hidden>
+      <div class="field">
+        <span class="label" id="l-app"></span>
+        <span class="control">
+          <span class="pop" data-cursor="app">
+            <svg viewBox="0 0 38 57" aria-hidden="true" id="figma-mark" hidden>
+              <path fill="#00B6FF" d="M19 28.5a9.5 9.5 0 1 1 19 0 9.5 9.5 0 0 1-19 0z"/>
+              <path fill="#24CB71" d="M0 47.5A9.5 9.5 0 0 1 9.5 38H19v9.5a9.5 9.5 0 1 1-19 0z"/>
+              <path fill="#FF7237" d="M19 0v19h9.5a9.5 9.5 0 1 0 0-19H19z"/>
+              <path fill="#FF3737" d="M0 9.5A9.5 9.5 0 0 0 9.5 19H19V0H9.5A9.5 9.5 0 0 0 0 9.5z"/>
+              <path fill="#874FFF" d="M0 28.5A9.5 9.5 0 0 0 9.5 38H19V19H9.5A9.5 9.5 0 0 0 0 28.5z"/>
+            </svg>
+            <span id="app-name"></span><span class="chev"><span>⌃</span><span>⌄</span></span>
+          </span>
+        </span>
+      </div>
+      <div class="field">
+        <span class="label" id="l-title"></span>
+        <span class="control">
+          <span class="input" id="f-title" data-cursor="menu"><span id="title-value"></span><i class="caret" id="caret" hidden></i></span>
+          <p class="hint" id="hint"></p>
+        </span>
+      </div>
+      <div class="field">
+        <span class="label" id="l-shortcut"></span>
+        <span class="control"><span class="input" id="f-shortcut" data-cursor="shortcut"></span></span>
+      </div>
+      <div class="add-foot">
+        <span class="btn" id="b-cancel"></span>
+        <span class="btn blue" id="b-add-done" data-cursor="add-done"></span>
+      </div>
+    </div>
+  </div>
+
+  <svg class="cursor" id="cursor" viewBox="0 0 22 28" aria-hidden="true">
+    <path d="M2 1.5v21.2l5.2-5 3.4 8 3.3-1.4-3.3-7.8h7.2z" fill="#111111" stroke="#FFFFFF" stroke-width="1.6" stroke-linejoin="round"/>
+  </svg>
+</div>
+
+<script>
+  var T = {
+    en: {
+      pane: 'Keyboard',
+      nav: ['Desktop & Dock', 'Displays', 'Lock Screen', 'Privacy & Security', 'Keyboard', 'Mouse', 'Trackpad'],
+      repeat: 'Key repeat rate', delay: 'Delay until repeat',
+      navRow: 'Keyboard navigation', bright: 'Adjust keyboard brightness in low light',
+      shortcutsButton: 'Keyboard Shortcuts…',
+      text: 'Text Input', dictation: 'Dictation',
+      cats: ['Dock', 'Display', 'Mission Control', 'Windows', 'Keyboard', 'Input Sources', 'Screenshots',
+             'Services', 'Spotlight', 'Accessibility', 'App Shortcuts', 'Function Keys', 'Modifier Keys'],
+      allApps: 'All Applications', help: 'Show Help menu',
+      restore: 'Restore Defaults', done: 'Done', cancel: 'Cancel',
+      app: 'Application:', title: 'Menu title:', shortcut: 'Keyboard shortcut:',
+      allAppsOption: 'All Applications',
+      hint: 'Enter the exact name of the menu command you want to add.',
+      press: 'Press keys now',
+      caps: [
+        'Open System Settings → Keyboard, then click Keyboard Shortcuts…',
+        'Pick App Shortcuts on the left, then click +',
+        'Choose Figma, and type the menu title exactly: Toggle Frame Names',
+        'Click the shortcut field, press ⌥⌘F, then click Done',
+        'Quit Figma with ⌘Q and open it again — ⌥⌘F now toggles frame names'
+      ]
+    },
+    ko: {
+      pane: '키보드',
+      nav: ['데스크탑 및 Dock', '디스플레이', '잠금 화면', '개인정보 보호 및 보안', '키보드', '마우스', '트랙패드'],
+      repeat: '키 반복 속도', delay: '반복 지연 시간',
+      navRow: '키보드 탐색', bright: '어두운 조명에서 키보드 밝기 조절',
+      shortcutsButton: '키보드 단축키…',
+      text: '텍스트 입력', dictation: '받아쓰기',
+      cats: ['Dock', '디스플레이', 'Mission Control', '윈도우', '키보드', '입력 소스', '스크린샷',
+             '서비스', 'Spotlight', '손쉬운 사용', '앱 단축키', '기능 키', '보조 키'],
+      allApps: '모든 응용 프로그램', help: '도움말 메뉴 보기',
+      restore: '기본값으로 복원', done: '완료', cancel: '취소',
+      app: '응용 프로그램:', title: '메뉴 제목:', shortcut: '키보드 단축키:',
+      allAppsOption: '모든 응용 프로그램',
+      hint: '추가하고자 하는 메뉴 명령의 정확한 이름을 입력하십시오.',
+      press: '지금 키 입력',
+      caps: [
+        '시스템 설정 → 키보드를 열고 키보드 단축키…를 누릅니다',
+        '왼쪽에서 앱 단축키를 고르고 + 버튼을 누릅니다',
+        'Figma를 고르고 메뉴 제목에 Toggle Frame Names를 그대로 입력합니다',
+        '단축키 칸을 누르고 ⌥⌘F를 누른 다음 완료를 누릅니다',
+        'Figma를 ⌘Q로 종료했다가 다시 열면 ⌥⌘F로 프레임 이름을 껐다 켭니다'
+      ]
+    }
+  };
+  var TILES = ['#6E7B8B', '#2B7FD4', '#8E8E93', '#2F6FB3', '#4A4A4F', '#6E6E73', '#4A4A4F', '#A2845E',
+               '#2B7FD4', '#2B7FD4', '#1E7BE0', '#6E6E73', '#6E6E73'];
+
+  var q = new URLSearchParams(location.search);
+  var lang = q.get('lang') === 'ko' ? 'ko' : 'en';
+  var t = T[lang];
+  document.body.className = lang;
+  document.documentElement.lang = lang;
+
+  function text(id, value) { document.getElementById(id).textContent = value; }
+
+  var cap = Number(q.get('cap') || 1);
+  text('step', cap);
+  text('cap', t.caps[cap - 1]);
+
+  text('pane-title', t.pane);
+  text('r-repeat', t.repeat); text('r-delay', t.delay);
+  text('r-nav', t.navRow); text('r-bright', t.bright);
+  text('b-shortcuts', t.shortcutsButton);
+  text('r-text', t.text); text('r-dictation', t.dictation);
+  text('all-apps', t.allApps); text('help-menu', t.help);
+  text('b-restore', t.restore); text('b-done', t.done);
+  text('b-cancel', t.cancel); text('b-add-done', t.done);
+  text('l-app', t.app); text('l-title', t.title); text('l-shortcut', t.shortcut);
+  text('hint', t.hint);
+
+  var nav = document.getElementById('nav');
+  t.nav.forEach(function (name, i) {
+    var row = document.createElement('div');
+    row.className = 'nav' + (name === t.pane ? ' on' : '');
+    row.innerHTML = '<span class="tile"></span><span></span>';
+    row.lastChild.textContent = name;
+    if (name !== t.pane) row.firstChild.style.background = ['#6E7B8B', '#2B7FD4', '#1E7BE0', '#2B7FD4', '', '#8E8E93', '#4A4A4F'][i];
+    nav.appendChild(row);
+  });
+
+  var view = q.get('view') || 'pane';
+  var sel = (q.get('sel') === 'apps' || view === 'add') ? t.cats[10] : t.cats[0];
+  var cats = document.getElementById('cats');
+  t.cats.forEach(function (name, i) {
+    var row = document.createElement('div');
+    row.className = 'cat' + (name === sel ? ' on' : '');
+    row.innerHTML = '<span class="tile"></span><span></span>';
+    row.lastChild.textContent = name;
+    if (name !== sel) row.firstChild.style.background = TILES[i];
+    if (i === 10) row.dataset.cursor = 'apps';
+    cats.appendChild(row);
+  });
+
+  document.getElementById('sheet').hidden = view === 'pane';
+  document.getElementById('add').hidden = view !== 'add';
+  document.getElementById('figma-group').hidden = q.get('added') !== '1';
+
+  // empty -> picked -> typed -> recording -> recorded, the order someone fills the sheet in.
+  var fields = q.get('fields') || 'empty';
+  var appPicked = fields !== 'empty';
+  var titleTyped = ['typed', 'recording', 'recorded'].indexOf(fields) !== -1;
+  document.getElementById('figma-mark').toggleAttribute('hidden', !appPicked);
+  text('app-name', appPicked ? 'Figma' : t.allAppsOption);
+  text('title-value', titleTyped ? 'Toggle Frame Names' : '');
+  document.getElementById('caret').toggleAttribute('hidden', titleTyped);
+  document.getElementById('f-title').classList.toggle('focus', fields !== 'recording' && fields !== 'recorded');
+
+  var shortcutField = document.getElementById('f-shortcut');
+  shortcutField.classList.toggle('focus', fields === 'recording');
+  if (fields === 'recording') {
+    shortcutField.textContent = t.press;
+    shortcutField.style.color = '#86868B';
+  } else if (fields === 'recorded') {
+    shortcutField.textContent = '⌥⌘F';
+  } else {
+    shortcutField.textContent = '';
+  }
+
+  var pressed = q.get('press');
+  if (pressed) {
+    var hit = document.querySelector('[data-cursor="' + pressed + '"]');
+    if (hit) hit.classList.add('down');
+  }
+
+  // The pointer is placed from the live layout, so it always lands on its target.
+  var cursor = document.getElementById('cursor');
+  var name = q.get('cursor');
+  var target = name && document.querySelector('[data-cursor="' + name + '"]');
+  if (!target) {
+    document.body.classList.add('no-cursor');
+  } else {
+    var box = target.getBoundingClientRect();
+    var frame = document.querySelector('.window').getBoundingClientRect();
+    var x = name === 'menu' ? box.left + 210 : box.left + box.width / 2;
+    cursor.style.left = (x - frame.left) + 'px';
+    cursor.style.top = (box.top + box.height * 0.58 - frame.top) + 'px';
+  }
+</script>
