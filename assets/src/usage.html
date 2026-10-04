@@ -10,7 +10,9 @@
     names=hidden       the frame names on the canvas are hidden
     scope=page|document|selection   scope selected in the window
     toast=hid|restored Figma notification at the bottom of the canvas
-    panel=tools        show Figma's right panel instead of the plugin window
+    side=window|panel|keys  what stands beside the canvas: the plugin window,
+                       Figma's right panel, or the keys of the macOS shortcut
+    keys=cmd,opt,f     keys held down
     cursor=toggle|scope|relaunch    where the pointer sits
     press=1            the thing under the pointer is being clicked
   Build everything with: python3 assets/src/build.py
@@ -33,7 +35,7 @@
   .caption .text { font-size: 29px; font-weight: 500; letter-spacing: -0.01em; color: #F5F5F3; }
 
   .stage { display: flex; align-items: flex-start; gap: 32px; height: 648px; }
-  .side { width: 380px; flex: none; display: flex; justify-content: flex-end; align-items: flex-start; }
+  .side { width: 380px; flex: none; align-self: stretch; display: flex; justify-content: flex-end; align-items: flex-start; }
 
   /* The plugin window, with the frame Figma draws around it. */
   .plugin { width: 380px; display: flex; flex-direction: column;
@@ -81,6 +83,17 @@
   .tool img { width: 18px; height: 18px; border-radius: 3px; flex: none; }
   .tool .minus { margin-left: auto; color: #8A8A8A; font-size: 15px; }
   body.press .tool { background: #E5E5E5; }
+
+  .keys { display: flex; gap: 12px; align-self: center; }
+  .key {
+    width: 80px; height: 80px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: -apple-system, "SF Pro Display", sans-serif; font-size: 36px; font-weight: 600;
+    background: #F4F4F2; color: #1A1C21; box-shadow: 0 7px 0 #B9BCC2;
+  }
+  .key.accent { background: #0D99FF; color: #FFFFFF; box-shadow: 0 7px 0 #0870C0; }
+  .key.down { transform: translateY(5px); box-shadow: 0 2px 0 #B9BCC2; background: #E4E4E1; }
+  .key.accent.down { box-shadow: 0 2px 0 #0870C0; background: #0A88E6; }
 
   .cursor { position: absolute; width: 30px; height: 38px; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.35)); }
   body.no-cursor .cursor { display: none; }
@@ -137,6 +150,12 @@
       </div>
     </div>
   </div>
+
+    <div class="keys" id="keys" hidden>
+      <div class="key" data-key="cmd">⌘</div>
+      <div class="key" data-key="opt">⌥</div>
+      <div class="key accent" data-key="f">F</div>
+    </div>
   </div>
 </div>
 
@@ -154,7 +173,8 @@
         'Click Hide frame names in the plugin window — the labels leave the canvas',
         'Click it again, and every name comes back the way it was',
         'Scope decides what changes: this page, all pages, or what you selected',
-        'After the first run, the right panel button does the same without the window'
+        'After the first run, the right panel button does the same without the window',
+        'Optional: set up the macOS shortcut once, and \u2325\u2318F does the same'
       ]
     },
     ko: {
@@ -165,7 +185,8 @@
         '플러그인 창에서 이름 숨기기를 누르면 캔버스의 프레임 이름이 사라집니다',
         '다시 누르면 이름이 그대로 돌아옵니다',
         '적용 범위로 이 페이지, 모든 페이지, 선택한 레이어 중에서 고릅니다',
-        '한 번 쓰고 나면 오른쪽 패널 버튼으로 창 없이 껐다 켭니다'
+        '한 번 쓰고 나면 오른쪽 패널 버튼으로 창 없이 껐다 켭니다',
+        '선택 사항 — macOS에서 단축키를 등록해 두면 \u2325\u2318F로도 껐다 켭니다'
       ]
     }
   };
@@ -192,9 +213,15 @@
   toast.hidden = !which;
   if (which) toast.textContent = (which === 'hid' ? t.hid : t.restored) + ' · ' + t.scope[scope];
 
-  var tools = q.get('panel') === 'tools';
-  document.getElementById('panel').hidden = !tools;
-  document.getElementById('plugin').hidden = tools;
+  var side = q.get('side') || 'window';
+  document.getElementById('panel').hidden = side !== 'panel';
+  document.getElementById('keys').hidden = side !== 'keys';
+  document.getElementById('plugin').hidden = side !== 'window';
+
+  var held = (q.get('keys') || '').split(',');
+  document.querySelectorAll('.key').forEach(function (key) {
+    key.classList.toggle('down', held.indexOf(key.dataset.key) !== -1);
+  });
 
   // The window is the real ui.html, rendered by the same message the plugin sends it.
   var state = {
@@ -224,7 +251,7 @@
     cursor.style.top = (offset.y + r.top + r.height * 0.55) + 'px';
   }
 
-  if (tools) {
+  if (side !== 'window') {
     placeCursor();
   } else {
     // The state goes straight into the window's own message handler, so it has finished

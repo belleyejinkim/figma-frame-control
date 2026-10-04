@@ -55,20 +55,24 @@ SHORTCUT_KEYFRAMES = (0, 4, 7, 11)
 
 # (query, milliseconds). Hiding names, bringing them back, scope, and the right panel button.
 USAGE = [
-    ("cap=1&cursor=toggle", 1300),
+    ("cap=1&cursor=toggle", 1200),
     ("cap=1&cursor=toggle&press=1", 200),
-    ("cap=1&names=hidden&toast=hid&cursor=toggle", 1600),
-    ("cap=2&names=hidden&cursor=toggle", 1000),
+    ("cap=1&names=hidden&toast=hid&cursor=toggle", 1500),
+    ("cap=2&names=hidden&cursor=toggle", 900),
     ("cap=2&names=hidden&cursor=toggle&press=1", 200),
-    ("cap=2&toast=restored&cursor=toggle", 1600),
-    ("cap=3&cursor=scope", 1100),
-    ("cap=3&scope=document&cursor=scope", 1400),
-    ("cap=4&panel=tools&cursor=relaunch", 1300),
-    ("cap=4&panel=tools&cursor=relaunch&press=1", 200),
-    ("cap=4&panel=tools&names=hidden&toast=hid", 1600),
+    ("cap=2&toast=restored&cursor=toggle", 1400),
+    ("cap=3&cursor=scope", 1000),
+    ("cap=3&scope=document&cursor=scope", 1200),
+    ("cap=4&side=panel&cursor=relaunch", 1100),
+    ("cap=4&side=panel&cursor=relaunch&press=1", 200),
+    ("cap=4&side=panel&names=hidden&toast=hid", 1500),
+    ("cap=5&side=keys&names=hidden", 1000),
+    ("cap=5&side=keys&names=hidden&keys=cmd", 160),
+    ("cap=5&side=keys&names=hidden&keys=cmd,opt", 160),
+    ("cap=5&side=keys&toast=restored&keys=cmd,opt,f", 1700),
 ]
 USAGE_SIZE = (1240, 840)
-USAGE_KEYFRAMES = (0, 2, 7, 10)
+USAGE_KEYFRAMES = (0, 2, 7, 10, 14)
 
 
 class QuietHandler(http.server.SimpleHTTPRequestHandler):

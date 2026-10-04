@@ -37,12 +37,13 @@ Manifest error: Expected "manifest.containsWidget" to have type true but got und
 
 ## How to use
 
-![Click Hide frame names in the plugin window to clear the labels, click again to bring them back, pick a scope, and use the right panel button afterwards](assets/usage-en.gif)
+![Click Hide frame names in the plugin window to clear the labels, click again to bring them back, pick a scope, use the right panel button, or press ⌥⌘F](assets/usage-en.gif)
 
 1. Open the plugin and click **Hide frame names**. The labels leave the canvas, and Figma says how many names it hid.
 2. Click the button again, and every name comes back the way it was.
 3. **Scope** decides what changes: this page, all pages, or the layers you selected.
 4. After the first run in a file, the **Hide/Show Frame Name** button in the right panel does the same without opening the window.
+5. Optional: once you set up the [keyboard shortcut](#keyboard-shortcut-macos-optional) on macOS, **⌥⌘F** hides and shows the names from anywhere in Figma.
 
 ## Commands
 
