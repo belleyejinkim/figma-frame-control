@@ -10,30 +10,21 @@
 
 ## 설치
 
-### Figma에서 설치
+**macOS는 터미널**, **Windows는 Git Bash**에서 아래 한 줄을 실행하세요. [Figma 데스크톱 앱](https://www.figma.com/downloads/)이 필요합니다.
 
-Frame Name Control은 곧 Figma Community에 올라갑니다. 공개되면 Figma를 벗어나지 않고 바로 설치할 수 있습니다.
-
-1. Figma에서 디자인 파일을 아무거나 엽니다.
-2. **⌘K**(Windows는 **Ctrl+K**)를 눌러 **Actions**를 열고 **Plugins & widgets** 탭을 고릅니다.
-3. **Frame Name Control**을 검색해 **Open**을 고릅니다.
-4. **이름 숨기기** 버튼을 누릅니다. 다시 누르면 이름이 돌아옵니다.
-
-한 번 실행하면 최근 사용한 플러그인 목록에 나타나서 다음에 쉽게 찾을 수 있습니다.
-
-### 소스에서 설치
-
-플러그인을 고치거나 공개 전의 변경 사항을 써 볼 때 쓰는 방법입니다. Figma 데스크톱 앱이 필요합니다.
-
-1. 이 저장소를 내려받아(**Code → Download ZIP**) 압축을 풉니다.
-2. Figma 데스크톱 앱에서 디자인 파일을 아무거나 엽니다.
-3. **Plugins → Development → Import plugin from manifest…** 메뉴를 고르고 `manifest.json`을 선택합니다.
-
-한 번만 불러오면 모든 파일에서 쓸 수 있습니다. **Widgets** 메뉴가 아니라 **Plugins** 메뉴로 불러와야 합니다. Widgets 메뉴로 불러오면 아래 에러가 납니다.
-
+```sh
+curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/install.sh | sh
 ```
-Manifest error: Expected "manifest.containsWidget" to have type true but got undefined instead
-```
+
+플러그인에 필요한 파일 3개를 `~/FigmaPlugins/figma-frame-control`에 설치합니다. Git이나 Node.js, 빌드 과정은 필요 없습니다. 업데이트할 때도 같은 명령어를 실행하세요. 실행 전에 [설치 스크립트](install.sh)를 확인할 수 있습니다.
+
+**Figma에서 최초 한 번 등록:** 명령어로 파일을 설치한 뒤, Figma에서 [플러그인을 불러와](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) 등록해야 합니다.
+
+1. Figma 데스크톱 앱에서 디자인 파일을 아무거나 엽니다.
+2. **Plugins → Development → Import plugin from manifest…** 메뉴를 고르고, 설치 명령이 출력한 폴더의 `manifest.json`을 선택합니다. **Plugins** 메뉴를 사용하세요.
+3. **Plugins → Development → Frame Name Control → Open**을 열고 **이름 숨기기**를 누릅니다.
+
+한 번 등록하면 모든 파일에서 쓸 수 있습니다. Figma가 파일을 읽을 수 있도록 설치 폴더를 그대로 두세요. 업데이트 후에는 다시 등록할 필요가 없습니다.
 
 ## 사용 방법
 

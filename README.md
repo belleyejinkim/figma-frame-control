@@ -10,30 +10,21 @@ Name labels help you find frames, but they clutter the canvas when you review a 
 
 ## Install
 
-### In Figma
+Run this one line in **Terminal on macOS** or **Git Bash on Windows**. You need the [Figma desktop app](https://www.figma.com/downloads/).
 
-Frame Name Control is coming soon to Figma Community. Once it's published, you can install it without leaving Figma:
-
-1. Open any design file in Figma.
-2. Press **⌘K** (Windows: **Ctrl+K**) to open **Actions**, then choose the **Plugins & widgets** tab.
-3. Search for **Frame Name Control** and choose **Open**.
-4. Click **Hide frame names**. Click it again to bring the names back.
-
-After the first run, the plugin shows up in your recent plugins, so it's easy to find again.
-
-### From source
-
-Use this to develop the plugin or to try changes before they're published. It needs the Figma desktop app.
-
-1. Download this repository (**Code → Download ZIP**) and unzip it.
-2. Open any design file in the Figma desktop app.
-3. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json`.
-
-You import the plugin once, and it appears in every file. Import through the **Plugins** menu, not **Widgets**. Importing through Widgets fails with this error:
-
+```sh
+curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/install.sh | sh
 ```
-Manifest error: Expected "manifest.containsWidget" to have type true but got undefined instead
-```
+
+This downloads the three plugin files to `~/FigmaPlugins/figma-frame-control`. No Git, Node.js, or build step is needed. Run the same command again to update. You can [read the installer](install.sh) before running it.
+
+**One-time setup in Figma:** the command installs the files; Figma requires you to [import the plugin](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) once to register it.
+
+1. Open any design file in the Figma desktop app.
+2. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json` from the folder printed by the installer. Use the **Plugins** menu.
+3. Run **Plugins → Development → Frame Name Control → Open** and click **Hide frame names**.
+
+Once imported, the plugin is available in every file. Keep the installed folder in place so Figma can load it. Updating the files does not require another import.
 
 ## How to use
 
