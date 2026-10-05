@@ -15,7 +15,9 @@
     keys=cmd,opt,f     keys held down
     cursor=toggle|scope|relaunch    where the pointer sits
     press=1            the thing under the pointer is being clicked
+    detail=panel       standalone right panel image, with the Tools button highlighted
   Build everything with: python3 assets/src/build.py
+  Build standalone right panel images with: python3 assets/src/render_right_panel.py
 -->
 <style>
   html, body { margin: 0; }
@@ -83,6 +85,8 @@
   .tool img { width: 18px; height: 18px; border-radius: 3px; flex: none; }
   .tool .minus { margin-left: auto; color: #8A8A8A; font-size: 15px; }
   body.press .tool { background: #E5E5E5; }
+  body.panel-detail .caption .step { display: none; }
+  body.panel-detail .tool { outline: 2px solid #0D99FF; background: #E8F5FF; }
 
   .keys { display: flex; gap: 12px; align-self: center; }
   .key {
@@ -167,6 +171,7 @@
   var T = {
     en: {
       page: 'Page', layer: 'Layer', tools: 'Tools',
+      panelCaption: 'Click Hide/Show Frame Name under Tools to hide or show names',
       hid: 'Hid 2 names', restored: 'Restored 2 names',
       scope: { page: 'This page', document: 'All pages', selection: 'Selection' },
       caps: [
@@ -179,6 +184,7 @@
     },
     ko: {
       page: '페이지', layer: '레이어', tools: 'Tools',
+      panelCaption: '오른쪽 패널의 Tools → Hide/Show Frame Name으로 이름을 껐다 켭니다',
       hid: '숨김 2개', restored: '복구 2개',
       scope: { page: '이 페이지', document: '모든 페이지', selection: '선택 영역' },
       caps: [
@@ -199,6 +205,10 @@
   var cap = Number(q.get('cap') || 1);
   document.getElementById('step').textContent = cap;
   document.getElementById('cap').textContent = t.caps[cap - 1];
+  if (q.get('detail') === 'panel') {
+    document.body.classList.add('panel-detail');
+    document.getElementById('cap').textContent = t.panelCaption;
+  }
   document.getElementById('p-page').textContent = t.page;
   document.getElementById('p-layer').textContent = t.layer;
   document.getElementById('p-tools').textContent = t.tools;
