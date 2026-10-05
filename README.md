@@ -28,13 +28,11 @@ Once imported, the plugin is available in every file. Keep the installed folder 
 
 ## How to use
 
-1. Open the plugin and click **Hide frame names**. The labels leave the canvas, and Figma says how many names it hid.
-2. Click the button again, and every name comes back the way it was.
+1. Open the plugin and click **Hide frame names** to hide the canvas labels.
+2. Click the button again to restore the names.
 3. **Scope** decides what changes: this page, all pages, or the layers you selected.
-4. After the first run in a file, the **Hide/Show Frame Name** button in the right panel does the same without opening the window.
-5. Optional: once you set up the [keyboard shortcut](#keyboard-shortcut-macos-optional) on macOS, **⌥⌘F** hides and shows the names from anywhere in Figma.
 
-You can also run a command directly from **Plugins → Development → Frame Name Control**. **Open** opens the window; the other commands work without it after the first run. On the first run, they open the window so you can read how the plugin changes names.
+The same actions are available under **Plugins → Development → Frame Name Control**. Commands other than **Open** show the plugin window on their first run so you can read how names change, then work without it.
 
 | Menu | What it does |
 | --- | --- |
@@ -48,9 +46,11 @@ You can also run a command directly from **Plugins → Development → Frame Nam
 
 ### Right panel button
 
-After the plugin runs a command in a file, a **Hide/Show Frame Name** button appears under **Tools** in the right panel. You see it when nothing is selected, and when you select a frame whose name shows on the canvas, on a page where the plugin has run. Frames you add later get it the next time the plugin runs on that page. Click it to hide or show names without opening a menu. It follows the plugin's scope, so it changes the whole page unless the scope is set to selected layers.
+After the first use in a file, click **Hide/Show Frame Name** under **Tools** in the right panel. It toggles names using the plugin's **Scope**, without opening the window.
 
-The button is saved with the file, so people who open the file see it too. To remove it from a layer, click **−** next to it. The plugin won't add it back.
+The button appears when nothing is selected or when you select a frame whose name shows on the canvas, on a page where the plugin has run. New frames get it the next time you run the plugin on that page.
+
+It is saved with the file, so collaborators see it too. To remove it from a layer, click **−**; the plugin won't add it back.
 
 ![The Figma right panel with Hide/Show Frame Name highlighted under Tools; click it to hide or show the frame names on the canvas](assets/right-panel-en.png)
 
