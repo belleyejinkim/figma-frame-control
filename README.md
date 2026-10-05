@@ -44,16 +44,6 @@ The same actions are available under **Plugins → Development → Frame Name Co
 
 ![Click Hide frame names in the plugin window to clear the labels, click again to bring them back, pick a scope, use the right panel button, or press ⌥⌘F](assets/usage-en.gif)
 
-### Right panel button
-
-After the first use in a file, click **Hide/Show Frame Name** under **Tools** in the right panel. It toggles names using the plugin's **Scope**, without opening the window.
-
-The button appears when nothing is selected or when you select a frame whose name shows on the canvas, on a page where the plugin has run. New frames get it the next time you run the plugin on that page.
-
-It is saved with the file, so collaborators see it too. To remove it from a layer, click **−**; the plugin won't add it back.
-
-![The Figma right panel with Hide/Show Frame Name highlighted under Tools; click it to hide or show the frame names on the canvas](assets/right-panel-en.png)
-
 ### Keyboard shortcut (macOS, optional)
 
 Figma can't give plugins a shortcut, but macOS can bind one to any menu item. It takes a minute, once per computer.
