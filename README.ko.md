@@ -10,24 +10,35 @@
 
 ## 설치
 
-[Figma 데스크톱 앱](https://www.figma.com/downloads/)이 필요합니다.
+### Figma Community에서 설치
+
+**Figma Community에 공개되었습니다.** 이제 Figma에서 검색해서 바로 사용할 수 있습니다.
+
+1. Figma Design 파일을 아무거나 엽니다.
+2. 툴바의 **Actions**를 누르거나 **⌘K**(Windows는 **Ctrl+K**)를 누릅니다.
+3. **Plugins & widgets** 탭에서 `Frame Name Control`을 검색합니다.
+4. **Frame Name Control**을 선택하고 **Open**을 고릅니다.
+
+![Figma Actions 메뉴의 Plugins & widgets 탭에서 Frame Name Control을 검색한 화면](assets/community-search.png)
 
 ### AI에게 설치 맡기기
 
-내 컴퓨터에 파일을 저장하거나 명령을 실행할 수 있는 AI 앱에 아래 프롬프트를 복사해서 붙여 넣으세요.
+AI에게 아래 프롬프트를 복사해서 붙여 넣으세요. Figma에서 설치를 진행하거나, 필요한 단계를 안내받을 수 있습니다.
 
 ```text
-내 컴퓨터에 Figma 플러그인 Frame Name Control을 설치해줘.
+Figma Community에서 Frame Name Control 플러그인을 설치할 수 있게 도와줘.
 저장소: https://github.com/belleyejinkim/figma-frame-control
 
-내 운영체제를 확인한 뒤, https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/ 에서 manifest.json, code.js, ui.html을 내 홈 폴더의 FigmaPlugins/figma-frame-control에 내려받아줘. macOS에서는 저장소의 install.sh를 실행해도 되고, Windows에서는 Git Bash를 설치하지 않고 PowerShell로 파일을 내려받아도 돼.
+Figma Design 파일에서 Actions > Plugins & widgets를 열고, Frame Name Control을 검색한 뒤 플러그인을 선택해서 Open을 실행하면 돼.
 
-파일 3개가 비어 있지 않고, manifest.json의 main과 ui가 내려받은 파일을 가리키는지 확인해줘. manifest.json의 절대경로도 알려줘.
+Figma를 조작할 수 있으면 직접 진행해주고, 조작할 수 없으면 내가 따라 할 수 있게 쉬운 말로 안내해줘. 기본적으로 Community 버전을 사용해줘. 이 방법은 소스 파일 다운로드나 manifest 등록이 필요 없어.
 
-Figma 데스크톱 앱을 조작할 수 있으면 Plugins > Development > Import plugin from manifest… 메뉴로 이 파일을 불러와 플러그인을 등록해줘. 직접 조작할 수 없으면 내가 최초 등록을 할 수 있게 쉬운 말로 안내해줘. 내 컴퓨터의 파일에 접근할 수 없다면, 설치를 완료하려면 어떤 접근 기능이 필요한지 알려줘.
+내가 소스 설치를 요청하면 저장소의 한 줄 설치 안내에 따라 파일을 설치하고 확인해줘. manifest.json의 절대경로와 Figma 데스크톱 앱에서 불러오는 방법도 알려줘.
 ```
 
-### 명령어 한 줄로 설치
+### 소스에서 설치 (명령어 한 줄)
+
+로컬 변경 사항을 써 보려면 [Figma 데스크톱 앱](https://www.figma.com/downloads/)에서 소스 버전을 설치하세요.
 
 **macOS는 터미널**, **Windows는 Git Bash**에서 아래 한 줄을 실행하세요.
 
@@ -37,7 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/m
 
 플러그인에 필요한 파일 3개를 `~/FigmaPlugins/figma-frame-control`에 설치합니다. Git이나 Node.js, 빌드 과정은 필요 없습니다. 업데이트할 때도 같은 명령어를 실행하세요. 실행 전에 [설치 스크립트](install.sh)를 확인할 수 있습니다.
 
-**Figma에서 최초 한 번 등록:** 명령어로 파일을 설치한 뒤, Figma에서 [플러그인을 불러와](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) 등록해야 합니다.
+**소스 버전은 최초 한 번 등록:** 명령어로 파일을 설치한 뒤, Figma에서 [플러그인을 불러와](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) 등록하세요.
 
 1. Figma 데스크톱 앱에서 디자인 파일을 아무거나 엽니다.
 2. **Plugins → Development → Import plugin from manifest…** 메뉴를 고르고, 설치 명령이 출력한 폴더의 `manifest.json`을 선택합니다. **Plugins** 메뉴를 사용하세요.
@@ -51,7 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/m
 2. 버튼을 다시 누르면 이름이 돌아옵니다.
 3. **적용 범위**로 이 페이지, 모든 페이지, 선택한 레이어 중에서 고릅니다.
 
-같은 동작을 **Plugins → Development → Frame Name Control** 메뉴에서도 실행할 수 있습니다. **Open**을 제외한 명령은 첫 실행 때 이름을 어떻게 바꾸는지 창에서 보여 주고, 이후에는 창 없이 동작합니다.
+같은 동작을 **Actions → Plugins & widgets**에서 **Frame Name Control** 옆의 드롭다운으로 실행할 수도 있습니다. **Open**을 제외한 명령은 첫 실행 때 이름을 어떻게 바꾸는지 창에서 보여 주고, 이후에는 창 없이 동작합니다.
 
 | 메뉴 | 하는 일 |
 | --- | --- |

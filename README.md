@@ -10,24 +10,35 @@ Name labels help you find frames, but they clutter the canvas when you review a 
 
 ## Install
 
-You need the [Figma desktop app](https://www.figma.com/downloads/).
+### From Figma Community
+
+Frame Name Control is now available on **Figma Community**. You can find and open it directly in Figma.
+
+1. Open any Figma Design file.
+2. Click **Actions** in the toolbar, or press **⌘K** on macOS (**Ctrl+K** on Windows).
+3. Choose **Plugins & widgets** and search for `Frame Name Control`.
+4. Select **Frame Name Control** and choose **Open**.
+
+![Search for Frame Name Control in Figma's Actions menu under Plugins & widgets](assets/community-search.png)
 
 ### Ask AI to install
 
-Copy this prompt into an AI app that can save files or run commands on your computer:
+Copy this prompt into your AI assistant. It can help you set up the plugin in Figma or guide you through the steps:
 
 ```text
-Install the Frame Name Control Figma plugin on my computer.
+Help me install Frame Name Control from Figma Community.
 Repository: https://github.com/belleyejinkim/figma-frame-control
 
-Check my operating system, then download manifest.json, code.js, and ui.html from https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/ into FigmaPlugins/figma-frame-control in my home folder. On macOS, you can use the repository's install.sh; on Windows, you can download the files with PowerShell without installing Git Bash.
+In a Figma Design file, open Actions > Plugins & widgets, search for Frame Name Control, select the plugin, and choose Open.
 
-Verify that all three files are nonempty and that the main and ui paths in manifest.json point to the downloaded files. Show me the absolute path to manifest.json.
+If you can control Figma, do those steps for me. Otherwise, guide me in simple language. Use the Community version by default; it does not require downloading source files or importing a manifest.
 
-If you can control the Figma desktop app, import that manifest through Plugins > Development > Import plugin from manifest… to register the plugin. Otherwise, walk me through that one-time step in simple language. If you cannot access files on my computer, tell me what access is needed to complete the installation.
+If I ask for a source installation instead, follow the repository's one-line installation instructions, verify the downloaded plugin files, and show me the absolute path to manifest.json and how to import it in the Figma desktop app.
 ```
 
-### Install with one command
+### From source (one command)
+
+To try local changes, install the source version with the [Figma desktop app](https://www.figma.com/downloads/).
 
 Run this one line in **Terminal on macOS** or **Git Bash on Windows**:
 
@@ -37,7 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/m
 
 This downloads the three plugin files to `~/FigmaPlugins/figma-frame-control`. No Git, Node.js, or build step is needed. Run the same command again to update. You can [read the installer](install.sh) before running it.
 
-**One-time setup in Figma:** the command installs the files; Figma requires you to [import the plugin](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) once to register it.
+**One-time setup for the source version:** the command installs the files; [import the plugin](https://help.figma.com/hc/en-us/articles/360042786733-Create-a-classic-plugin-for-development) once to register it in Figma.
 
 1. Open any design file in the Figma desktop app.
 2. Choose **Plugins → Development → Import plugin from manifest…** and select `manifest.json` from the folder printed by the installer. Use the **Plugins** menu.
@@ -51,7 +62,7 @@ Once imported, the plugin is available in every file. Keep the installed folder 
 2. Click the button again to restore the names.
 3. **Scope** decides what changes: this page, all pages, or the layers you selected.
 
-The same actions are available under **Plugins → Development → Frame Name Control**. Commands other than **Open** show the plugin window on their first run so you can read how names change, then work without it.
+The same actions are available in the dropdown beside **Frame Name Control** in **Actions → Plugins & widgets**. Commands other than **Open** show the plugin window on their first run so you can read how names change, then work without it.
 
 | Menu | What it does |
 | --- | --- |
