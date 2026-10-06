@@ -10,7 +10,26 @@
 
 ## 설치
 
-**macOS는 터미널**, **Windows는 Git Bash**에서 아래 한 줄을 실행하세요. [Figma 데스크톱 앱](https://www.figma.com/downloads/)이 필요합니다.
+[Figma 데스크톱 앱](https://www.figma.com/downloads/)이 필요합니다.
+
+### AI에게 설치 맡기기
+
+내 컴퓨터에 파일을 저장하거나 명령을 실행할 수 있는 AI 앱에 아래 프롬프트를 복사해서 붙여 넣으세요.
+
+```text
+내 컴퓨터에 Figma 플러그인 Frame Name Control을 설치해줘.
+저장소: https://github.com/belleyejinkim/figma-frame-control
+
+내 운영체제를 확인한 뒤, https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/ 에서 manifest.json, code.js, ui.html을 내 홈 폴더의 FigmaPlugins/figma-frame-control에 내려받아줘. macOS에서는 저장소의 install.sh를 실행해도 되고, Windows에서는 Git Bash를 설치하지 않고 PowerShell로 파일을 내려받아도 돼.
+
+파일 3개가 비어 있지 않고, manifest.json의 main과 ui가 내려받은 파일을 가리키는지 확인해줘. manifest.json의 절대경로도 알려줘.
+
+Figma 데스크톱 앱을 조작할 수 있으면 Plugins > Development > Import plugin from manifest… 메뉴로 이 파일을 불러와 플러그인을 등록해줘. 직접 조작할 수 없으면 내가 최초 등록을 할 수 있게 쉬운 말로 안내해줘. 내 컴퓨터의 파일에 접근할 수 없다면, 설치를 완료하려면 어떤 접근 기능이 필요한지 알려줘.
+```
+
+### 명령어 한 줄로 설치
+
+**macOS는 터미널**, **Windows는 Git Bash**에서 아래 한 줄을 실행하세요.
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/install.sh | sh

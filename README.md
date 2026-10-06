@@ -10,7 +10,26 @@ Name labels help you find frames, but they clutter the canvas when you review a 
 
 ## Install
 
-Run this one line in **Terminal on macOS** or **Git Bash on Windows**. You need the [Figma desktop app](https://www.figma.com/downloads/).
+You need the [Figma desktop app](https://www.figma.com/downloads/).
+
+### Ask AI to install
+
+Copy this prompt into an AI app that can save files or run commands on your computer:
+
+```text
+Install the Frame Name Control Figma plugin on my computer.
+Repository: https://github.com/belleyejinkim/figma-frame-control
+
+Check my operating system, then download manifest.json, code.js, and ui.html from https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/ into FigmaPlugins/figma-frame-control in my home folder. On macOS, you can use the repository's install.sh; on Windows, you can download the files with PowerShell without installing Git Bash.
+
+Verify that all three files are nonempty and that the main and ui paths in manifest.json point to the downloaded files. Show me the absolute path to manifest.json.
+
+If you can control the Figma desktop app, import that manifest through Plugins > Development > Import plugin from manifest… to register the plugin. Otherwise, walk me through that one-time step in simple language. If you cannot access files on my computer, tell me what access is needed to complete the installation.
+```
+
+### Install with one command
+
+Run this one line in **Terminal on macOS** or **Git Bash on Windows**:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/belleyejinkim/figma-frame-control/main/install.sh | sh
